@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Work — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #080c16;
+      --text-primary: #f0f0f0;
+      --text-muted:   #666;
+      --accent:       #FF0077;
+    }
+
+    html {
+      overflow-x: hidden; /* 横スクロールを html 側でクリップ（body を scroll container にしない） */
+    }
+    html, body {
+      width: 100%;
+      background: var(--bg);
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+    }
+    body {
+      overflow-x: clip; /* clip は scroll container を生成しないため sticky が機能する */
+    }
+
+    /* ── Dot grid ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.14) 1.4px, transparent 1.4px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+
+    /* ── BG blur ── */
+    #bg-blur {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    #bg-blur-inner {
+      position: absolute;
+      inset: -8%;
+      background-size: cover;
+      background-position: center;
+      filter: blur(48px);
+      opacity: 0.22;
+      transition: background 0.8s ease, background-image 0.8s ease;
+    }
+
+    /* ── Header ── */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      mix-blend-mode: difference;
+    }
+    .logo img {
+      height: 22px;
+      width: auto;
+      display: block;
+    }
+    .logo span {
+      font-size: 15px;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.45);
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .nav-links a {
+      position: relative;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: rgba(255,255,255,0.9); }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleX(0);
+      transform-origin: right center;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a:hover::after {
+      transform: translateY(-50%) scaleX(1);
+      transform-origin: left center;
+    }
+
+    /* ── Title header ── */
+    #detail-header {
+      padding-bottom: 56px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 56px;
+    }
+    #detail-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    #detail-title {
+      font-size: clamp(32px, 5vw, 72px);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      color: rgba(255,255,255,0.96);
+      line-height: 1.05;
+    }
+
+    /* ── Hashtags / URL ── */
+    #detail-hashtags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .detail-hashtag {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 13px;
+      border-radius: 100px;
+    }
+    #detail-url {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.28);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    #detail-url:hover { color: var(--accent); }
+
+    /* ── Content (2-column) ── */
+    #detail-content {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+      padding: 140px 72px 80px;
+    }
+    #detail-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 64px;
+      align-items: start;
+    }
+    #detail-gallery-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    #detail-gallery-col img {
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 1;
+    }
+    #detail-gallery-col .gallery-item--pdf {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    #detail-gallery-col .gallery-item--pdf iframe {
+      width: 100%; height: 75vh; border: none; display: block;
+    }
+    #detail-outline {
+      padding: 32px 36px;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      position: -webkit-sticky;
+      position: sticky;
+      top: 120px;
+      align-self: start;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+    }
+    .outline-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    #detail-desc {
+      font-size: 15px;
+      line-height: 1.95;
+      color: rgba(255,255,255,0.82);
+      white-space: pre-line;
+    }
+    #detail-desc a.inline-link {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(255,0,119,0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s, text-decoration-color 0.2s;
+    }
+    #detail-desc a.inline-link:hover {
+      color: var(--accent);
+      text-decoration-color: var(--accent);
+    }
+    #detail-desc a.inline-link svg {
+      flex-shrink: 0;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    #detail-desc a.inline-link:hover svg { opacity: 1; }
+    .outline-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .outline-meta-label {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+    }
+    .outline-meta-value {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+    }
+
+    /* ── Navigation row ── */
+    #detail-nav-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 40px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: none;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.05);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .nav-btn:hover { color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.28); }
+    .nav-btn:hover::before { transform: scaleX(1); }
+    .nav-btn span { position: relative; z-index: 1; }
+    .nav-btn svg { position: relative; z-index: 1; }
+    #detail-prev { border-right: none; }
+    #detail-counter {
+      font-size: 11px;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.1em;
+      margin-left: auto;
+      padding-right: 4px;
+    }
+
+
+    /* ── Thumb strip ── */
+    #thumb-section {
+      padding: 64px 72px 100px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    #thumb-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.18);
+      margin-bottom: 28px;
+    }
+    #thumb-strip {
+      column-count: 5;
+      column-gap: 12px;
+    }
+    .thumb-item {
+      break-inside: avoid;
+      width: 100%;
+      margin-bottom: 12px;
+      cursor: none;
+      transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+      will-change: transform;
+    }
+    .thumb-item:hover { }
+    .thumb-item.active { display: none; }
+    .thumb-img-wrap {
+      width: 100%;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 8px;
+      transition: border-color 0.25s;
+    }
+    .thumb-item:hover .thumb-img-wrap { border-color: rgba(255,255,255,0.26); }
+    .thumb-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .thumb-grad {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: block;
+    }
+    .thumb-tag {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+      opacity: 0.7;
+    }
+    .thumb-title {
+      font-size: 12px;
+      color: rgba(255,255,255,0.38);
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.2s;
+    }
+    .thumb-item:hover .thumb-title { color: rgba(255,255,255,0.78); }
+
+    /* ── Marquee ── */
+    #marquee-wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.04;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    #marquee-track {
+      display: inline-flex;
+      align-items: center;
+      animation: marquee-scroll 80s linear infinite;
+    }
+    #marquee-track span {
+      font-size: 200px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      padding-right: 120px;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── Fade overlay ── */
+    #fade-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: #000;
+      pointer-events: all;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ── Mouse stalker ── */
+    #cursor-stalker {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 56px;
+      height: 56px;
+      transform: translate(-50%, -50%);
+      left: -100px;
+      top: -100px;
+      opacity: 0;
+      transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.28);
+    }
+    #cursor-stalker.visible { opacity: 1; }
+    #cursor-stalker.hovering {
+      width: 58px;
+      height: 58px;
+    }
+    #cursor-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      transition: background 0.2s ease, width 0.2s ease, height 0.2s ease;
+    }
+    #cursor-stalker.hovering #cursor-dot {
+      background: rgba(255,255,255,0.9);
+      width: 8px;
+      height: 8px;
+    }
+
+    /* ── Scroll reveal ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .reveal.in-view {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── PDF fallback ── */
+    .gallery-item--pdf {
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .gallery-item--pdf iframe {
+      width:100%; height:75vh; border:none; display:block;
+    }
+    .pdf-fallback {
+      padding:10px 16px; text-align:center;
+      font-size:11px; color:rgba(255,255,255,.45);
+      border-top:1px solid rgba(255,255,255,.07);
+    }
+    .pdf-fallback a { color:var(--accent); text-decoration:none; }
+    .pdf-fallback a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+<!-- BG blur -->
+<div id="bg-blur"><div id="bg-blur-inner"></div></div>
+
+<!-- Header -->
+<div id="header">
+  <a class="logo" href="index.html" id="logo-link"><img src="images/name.svg" alt="Kumi Koishi"><span>/ Portfolio</span></a>
+  <nav class="nav-links">
+    <a href="about.html" id="about-link">about</a>
+    <a href="#contact">contact</a>
+  </nav>
+</div>
+
+
+<!-- Content -->
+<section id="detail-content">
+  <div id="detail-header" class="reveal">
+    <div id="detail-tag"></div>
+    <h1 id="detail-title"></h1>
+    <div id="detail-hashtags"></div>
+    <a id="detail-url" href="#" target="_blank"></a>
+  </div>
+  <div id="detail-body" class="reveal">
+    <div id="detail-gallery-col"></div>
+    <div id="detail-outline">
+      <div>
+        <div class="outline-label">Overview</div>
+        <p id="detail-desc"></p>
+      </div>
+      <div>
+        <div class="outline-meta-row">
+          <span class="outline-meta-label">Category</span>
+          <span class="outline-meta-value" id="detail-outline-tag"></span>
+        </div>
+        <div class="outline-meta-row">
+          <span class="outline-meta-label">Year</span>
+          <span class="outline-meta-value" id="detail-outline-year"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="detail-nav-row" class="reveal">
+    <button class="nav-btn" id="detail-prev">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span>Prev</span>
+    </button>
+    <button class="nav-btn" id="detail-next">
+      <span>Next</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <span id="detail-counter"></span>
+  </div>
+</section>
+
+
+<!-- Thumb strip -->
+<section id="thumb-section">
+  <div id="thumb-section-label">Other Works</div>
+  <div id="thumb-strip"></div>
+</section>
+
+<!-- Marquee -->
+<div id="marquee-wrap">
+  <div id="marquee-track">
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+  </div>
+</div>
+
+<!-- Fade overlay -->
+<div id="fade-overlay"></div>
+
+<!-- Mouse stalker -->
+<div id="cursor-stalker"><div id="cursor-dot"></div></div>
+
+<script>
+const ITEMS = [
+  // 0
+  { tag:'Branding', title:'Maison Verte — Visual Identity', year:'2024', grad:['#FF6B6B','#FF8E53'], img:'images/tp-01.png',
+    tags:['ブランディング','ロゴ','パッケージ'], url:'',
+    desc:'',
+    gallery:[] },
+  // 1
+  { tag:'Branding', title:'AI SHIFT', year:'2024', grad:['#4FACFE','#00C6FF'], img:'images/tp-07.png',
+    tags:['ブランディング','ロゴ','Webデザイン'], url:'',
+    desc:'02. 株式会社AI Shift（ブランディング・Webサイト）\n徹底したコンセプトワーク\n\nロゴのコンセプト設計からWebサイトの構築までトータルで担当。\nロゴ制作では、チームでのアイデア出しから20案以上のプロトタイプを作成し、黄金比・白銀比を用いた緻密なブラッシュアップを重ねました。Webサイトでは、AIの先進性を表現するため海外サイトのような大胆なレイアウトを採用。ロゴの意図である「AIと人の融合」をアニメーションにも落とし込み、一貫したブランド体験を提供しました。その結果、クライアントから高い評価をいただき、継続的なパートナーシップへと繋がっています。',
+    gallery:['images/tp-07-aishift/aishift-01.svg','images/tp-07-aishift/aishift-02.png','images/tp-07-aishift/aishift-03.png','images/tp-07-aishift/aishift-04.png'] },
+  // 2
+  { tag:'Branding', title:'ALGORI', year:'2023', grad:['#43E97B','#38F9D7'], img:'images/tp-05.png',
+    tags:['ブランディング','ロゴ','Webデザイン'], url:'',
+    desc:'学生エンジニア向けプログラミングコンテスト「ALGORI」\n一貫した世界観でプログラミングの「言語的意義」を視覚化\n\n学生エンジニアを対象としたコンテストにおいて、ロゴ、Webサイト、チラシ、オンライン配信画面など、ビジュアルコミュニケーション全般の制作を担当。\n「プログラミング＝コンピューターとの対話」と定義し、文字、音声、点字、手話、モールス信号といった多様なコミュニケーション手段をビジュアライズの起点としました。先進的な配色と質感を取り入れることで、学生の感性に響くクリエイティブを追求し、プログラミング言語の本質を問うコンテストイメージをトータルに構築しています。',
+    gallery:['images/tp-05-algori/algori-01.png','images/tp-05-algori/algori-03.jpg','images/tp-05-algori/algori-04.png',{type:'pdf',src:'images/tp-05-algori/logo-regulation.pdf'}] },
+  // 3
+  { tag:'UI / UX', title:'cloud tech ideathon', year:'2024', grad:['#667EEA','#764BA2'], img:'images/03.png',
+    tags:['UI/UX','LP','Webデザイン'], url:'',
+    desc:'CLOUD TECH IDEATHON\n「素材と個性」が融合し、新たなエネルギーへ昇華するビジュアル\n\n「デバイス×ソフトウェア」による未知の体験を提案するアイデアソンにおいて、LP制作をリードしました。\nメインビジュアルでは、異なる形状や質感を持つオブジェクトを「素材・アイデア・個性」の象徴として抽象度高く配置。それらがビビッドなグリーンのコードによって結びつき、一つの大きなエネルギーへと昇華していく様を描くことで、イベントが目指す「創造性」と「共創」を体現しました。',
+    gallery:[] },
+  // 4
+  { tag:'UI / UX', title:'Dashboard System — SaaS', year:'2024', grad:['#11998E','#38EF7D'], img:'images/10.png',
+    tags:['UI/UX','ダッシュボード','SaaS'], url:'',
+    desc:'',
+    gallery:['images/10-trami/trami01.png'] },
+  // 5
+  { tag:'Illustration', title:'conference', year:'2024', grad:['#F7971E','#FFD200'], img:'images/tp-02.png',
+    tags:['Webデザイン','グラフィック','UI/UX'], url:'',
+    desc:'TECH PLAY Conference\n「知的好奇心の鼓動」を視覚化するカンファレンス・デザイン\n\nIT従事者がオンラインで集うカンファレンスの総合トップページ制作を担当。\n新しい技術に触れる際の高揚感を「心臓（鼓動）」のモチーフで具現化しました。テクノロジーを感じさせる質感と有機的なモチーフを掛け合わせることで、エンジニアの感性に響く親和性の高いビジュアルを構築しています。',
+    gallery:['images/tp-02-tpc/tpc01.png','images/tp-02-tpc/tpc02.png'] },
+  // 6
+  { tag:'Illustration', title:'guideline', year:'2023', grad:['#373B44','#4286F4'], img:'images/04.png',
+    tags:['グラフィック','デザインガイドライン','Webデザイン'], url:'',
+    desc:'TECH PLAY デザインガイドライン・実績紹介\n組織のクリエイティビティを支える視覚言語の構築\n\n社内のデザイン一貫性を保つためのガイドライン、および実績紹介資料の制作を担当。\nガイドラインでは、ブランドカラーである「TECH PLAYブルー」を基調に、ピクセルで表現した光の演出を加えることでテック領域の先進性を強調しました。実績紹介では、デザインツール（UI、動画、グラフィック等）を想起させるビジュアルをトップに配置し、直感的に内容が伝わる機能的な構成としています。',
+    gallery:[{type:'pdf',src:'images/04-guideline/DESIGN_GUIDELINES.pdf'},{type:'pdf',src:'images/04-guideline/creative.pdf'}] },
+  // 7
+  { tag:'Photography', title:'sendai', year:'2024', grad:['#1a1a2e','#16213E'], img:'images/01.png',
+    tags:['ブランディング','Webデザイン','グラフィック'], url:'',
+    desc:'SENDAI X-TECH INNOVATION PROJECT\n先端技術と地域産業が交差する「未来の豊かさ」をデザインで表現\n\n先端IT技術と既存産業の掛け合わせ（X-TECH）により、東北・仙台の未来を創出するプロジェクトのクリエイティブを支援。ロゴ制作からWebサイトのデザイン・コーディング、イベント用グラフィック（チラシ・配信画面等）まで幅広く手がけました。プロジェクトの持つイノベーティブな空気感を、一貫性のあるデザインパッケージとして具現化しています。',
+    gallery:['images/03-sendai/sendai-01.png','images/03-sendai/sendai-02.png','images/03-sendai/sendai-03.png','images/03-sendai/sendai-04.png'] },
+  // 8
+  { tag:'Photography', title:'UI', year:'2023', grad:['#0F0C29','#302B63'], img:'images/tp-09.png',
+    tags:['UI/UX','Webデザイン'], url:'',
+    desc:'安否確認サービス UIデザイン\n複雑な要件を整理し、アクセシビリティを追求したUI設計\n\n大規模な安否確認サービスのUI設計を担当。\nメインデザイナーとして、エンジニアやディレクター、若手デザイナーを含む多職種チームを牽引しました。情報設計（構成）の段階から参画し、デザインシステムの構築、コンポーネントの共通化、アクセシビリティに配慮した導線設計を徹底。複雑な要件を一つひとつ整理し、緊急時でも迷わず操作できる、堅牢かつ使い勝手の良いインターフェースを実現しました。',
+    gallery:['images/tp-09-anpi/anpi01.png','images/tp-09-anpi/anpi02.png','images/tp-09-anpi/anpi03.png','images/tp-09-anpi/anpi04.png','images/tp-09-anpi/anpi05.png'] },
+  // 9
+  { tag:'Web Design', title:'Nasce', year:'2024', grad:['#8360C3','#2EBF91'], img:'images/12.png',
+    tags:['Webデザイン','ブランドサイト','UI/UX'], url:'',
+    desc:'ヘアケアブランド「NASCE」\n余白と光のコントロールで引き出す、ブランド本来の美しさ\n\n「髪本来の美しさを惹き出す」というコンセプトに基づき、ブランドサイトの制作を担当。\n白を基調としたミニマルなデザインにより、商品ビジュアルを最大限に引き立てる世界観を構築しました。撮影現場への同行や、レタッチによる光のトーン統一、社内イラストレーターとの連携を通じ、ディテールまで妥協のない品質管理を徹底。ブランドの「教える」姿勢を、リズムのあるレイアウトで親しみやすく表現しています。',
+    gallery:['images/12-nasce/nasce01.png'] },
+  // 10
+  { tag:'Web Design', title:'TECH PLAY Banner', year:'2023', grad:['#1D976C','#93F9B9'], img:'images/02.png',
+    tags:['バナー','クリエイティブ','グラフィック'], url:'',
+    desc:'TECH PLAY バナー・クリエイティブ制作\nテクノロジー領域に彩りを添え、資産となるデザインを\n\nイベントの集客最大化を目的とし、ブランドイメージと連動した高純度のデザインを提供しています。\n単に消費される一過性の広告ではなく、コンテンツへの期待感を高め、ユーザーとの接点を強固にする「資産」としてのデザインを追求。テクノロジー領域だからこそ求められる高いクオリティにこだわり、ステークホルダーへ価値を届けるとともに、受け手の心にワクワクを灯すような、彩り豊かなクリエイティブを展開しています。',
+    gallery:['images/02-tpbnr/tpbnr-01.png','images/02-tpbnr/tpbnr-02.jpg','images/02-tpbnr/tpbnr-03.jpg','images/02-tpbnr/tpbnr-04.jpg','images/02-tpbnr/tpbnr-05.jpg','images/02-tpbnr/tpbnr-06.png','images/02-tpbnr/tpbnr-07.png','images/02-tpbnr/tpbnr-08.png','images/02-tpbnr/tpbnr-09.jpg','images/02-tpbnr/tpbnr-10.png','images/02-tpbnr/tpbnr-11.png','images/02-tpbnr/tpbnr-12.png','images/02-tpbnr/tpbnr-13.png','images/02-tpbnr/tpbnr-14.png','images/02-tpbnr/tpbnr-15.png','images/02-tpbnr/tpbnr-16.png','images/02-tpbnr/tpbnr-17.png','images/02-tpbnr/tpbnr-18.png','images/02-tpbnr/tpbnr-19.jpg','images/02-tpbnr/tpbnr-20.png','images/02-tpbnr/tpbnr-21.png','images/02-tpbnr/tpbnr-22.jpg','images/02-tpbnr/tpbnr-23.png','images/02-tpbnr/tpbnr-24.jpg','images/02-tpbnr/tpbnr-25.png','images/02-tpbnr/tpbnr-26.png'] },
+  // 11
+  { tag:'Print', title:'Business card', year:'2024', grad:['#C94B4B','#4B134F'], img:'images/11.png',
+    tags:['プリント','名刺','グラフィック'], url:'',
+    desc:'',
+    gallery:['images/11-business/business01.png'] },
+];
+
+const params = new URLSearchParams(location.search);
+let currentIndex = Math.max(0, Math.min(parseInt(params.get('id') || '0'), ITEMS.length - 1));
+
+// ── フェードイン ──
+const fadeOverlay = document.getElementById('fade-overlay');
+setTimeout(() => {
+  fadeOverlay.style.opacity = '0';
+  setTimeout(() => { fadeOverlay.style.pointerEvents = 'none'; }, 550);
+}, 50);
+
+// ── コンテンツ表示 ──
+function show(idx) {
+  const item = ITEMS[idx];
+  document.getElementById('detail-tag').textContent        = item.tag;
+  document.getElementById('detail-title').textContent      = item.title;
+  // desc内のURLをリンク化
+  const rawDesc = item.desc || '';
+  const escapedDesc = rawDesc
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const linkedDesc = escapedDesc.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '<a class="inline-link" href="$1" target="_blank" rel="noopener noreferrer">' +
+    '$1<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' +
+    '<polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>' +
+    '</svg></a>'
+  );
+  document.getElementById('detail-desc').innerHTML = linkedDesc;
+  document.getElementById('detail-outline-tag').textContent  = item.tag;
+  document.getElementById('detail-outline-year').textContent = item.year;
+  document.getElementById('detail-counter').textContent    = `${idx + 1} / ${ITEMS.length}`;
+  document.title = item.title + ' — Portfolio';
+
+  // ハッシュタグ
+  const hashEl = document.getElementById('detail-hashtags');
+  hashEl.innerHTML = (item.tags || []).map(t => `<span class="detail-hashtag">#${t}</span>`).join('');
+
+  // URL
+  const urlEl = document.getElementById('detail-url');
+  if (item.url) {
+    urlEl.textContent = item.url;
+    urlEl.href = 'https://' + item.url;
+    urlEl.style.display = 'inline-block';
+  } else {
+    urlEl.style.display = 'none';
+  }
+
+  // ── 左カラム（画像・PDF）──────────────────────────────────
+  const galCol = document.getElementById('detail-gallery-col');
+  const gallery = item.gallery || [];
+  const grad = `linear-gradient(135deg, ${item.grad.join(', ')})`;
+  let gHtml = '';
+  if (gallery.length > 0) {
+    gallery.forEach(g => {
+      if (typeof g === 'string') {
+        gHtml += `<img src="${g}" alt="" loading="lazy">`;
+      } else if (g.type === 'pdf') {
+        const name = g.src.split('/').pop();
+        gHtml += `<div class="gallery-item--pdf">
+          <iframe src="${g.src}#toolbar=0" title="${name}"></iframe>
+          <p class="pdf-fallback"><a href="${g.src}" target="_blank">↗ ${name} を別タブで開く</a></p>
+        </div>`;
+      }
+    });
+  } else if (item.img) {
+    gHtml = `<img src="${item.img}" alt="${item.title}">`;
+  } else {
+    gHtml = `<div style="background:${grad};aspect-ratio:4/3;"></div>`;
+  }
+  galCol.innerHTML = gHtml;
+
+  // BG blur 更新
+  const bgBlurInner = document.getElementById('bg-blur-inner');
+  if (item.img) {
+    bgBlurInner.style.backgroundImage = `url(${item.img})`;
+    bgBlurInner.style.background = `url(${item.img}) center/cover no-repeat`;
+  } else {
+    bgBlurInner.style.background = grad;
+  }
+
+  // サムネイル active 更新
+  document.querySelectorAll('.thumb-item').forEach(el => {
+    el.classList.toggle('active', +el.dataset.idx === idx);
+  });
+}
+show(currentIndex);
+
+// ── Prev / Next ──
+function navigate(dir) {
+  currentIndex = ((currentIndex + dir) + ITEMS.length) % ITEMS.length;
+  show(currentIndex);
+  history.replaceState(null, '', `detail.html?id=${currentIndex}`);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.getElementById('detail-prev').addEventListener('click', () => navigate(-1));
+document.getElementById('detail-next').addEventListener('click', () => navigate(1));
+
+// ── Back ──
+function goBack() {
+  const pfTrans = sessionStorage.getItem('pfTransition');
+  if (pfTrans) {
+    sessionStorage.setItem('pfReturn', pfTrans);
+    sessionStorage.removeItem('pfTransition');
+  }
+  fadeOverlay.style.pointerEvents = 'all';
+  fadeOverlay.style.opacity = '1';
+  setTimeout(() => { window.location.href = 'index.html'; }, 550);
+}
+
+// ── フェードアウト遷移（ヘッダーリンク）──
+[document.getElementById('logo-link'), document.getElementById('about-link')].forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    fadeOverlay.style.pointerEvents = 'all';
+    fadeOverlay.style.opacity = '1';
+    setTimeout(() => { window.location.href = a.getAttribute('href'); }, 520);
+  });
+});
+
+// ── キーボード ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape')     goBack();
+  if (e.key === 'ArrowLeft')  navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
+});
+
+
+// ── Mouse stalker ──
+const stalker = document.getElementById('cursor-stalker');
+let sx = -100, sy = -100, mx = -100, my = -100;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+document.addEventListener('mouseenter', () => stalker.classList.add('visible'));
+document.addEventListener('mouseleave', () => stalker.classList.remove('visible'));
+document.querySelectorAll('a, button, [role="button"]').forEach(el => {
+  el.addEventListener('mouseenter', () => stalker.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => stalker.classList.remove('hovering'));
+});
+(function loop() {
+  sx += (mx - sx) * 0.12;
+  sy += (my - sy) * 0.12;
+  stalker.style.left = sx + 'px';
+  stalker.style.top  = sy + 'px';
+  requestAnimationFrame(loop);
+})();
+
+// ── Thumb strip ──
+// アイテムごとのアスペクト比（縦横バリエーションでPinterest風に）
+const THUMB_ASPECTS = [
+  '4/3','3/4','1/1','4/3','3/5',
+  '4/3','1/1','3/4','4/3','4/3',
+  '3/4','4/3','3/5','4/3','1/1'
+];
+
+function buildThumbs() {
+  const strip = document.getElementById('thumb-strip');
+  strip.innerHTML = '';
+  ITEMS.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'thumb-item' + (i === currentIndex ? ' active' : '');
+    el.dataset.idx = i;
+    const gradCss = `linear-gradient(135deg, ${item.grad.join(', ')})`;
+    const imgHtml = item.img
+      ? `<img src="${item.img}" alt="${item.title}" class="thumb-img">`
+      : `<div class="thumb-grad" style="background:${gradCss}"></div>`;
+    el.innerHTML = `
+      <div class="thumb-img-wrap">${imgHtml}</div>
+      <div class="thumb-tag">${item.tag}</div>
+      <div class="thumb-title">${item.title}</div>`;
+
+    // ── 3D Tilt（index.htmlのカードと同じ挙動）──
+    const MAX_TILT = 9;
+    el.addEventListener('mousemove', e => {
+      el.style.transition = 'box-shadow 0.2s ease';
+      const r = el.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
+      const dy = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
+      el.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg) scale(1.04) translateZ(8px)`;
+      el.style.boxShadow = '0 20px 56px rgba(0,0,0,0.28)';
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transition = 'box-shadow 0.5s ease, transform 0.65s cubic-bezier(0.23, 1, 0.32, 1)';
+      el.style.transform = '';
+      el.style.boxShadow = '';
+      stalker.classList.remove('hovering');
+    });
+
+    el.addEventListener('click', () => {
+      if (i === currentIndex) return;
+      currentIndex = i;
+      history.replaceState(null, '', `detail.html?id=${currentIndex}`);
+      fadeOverlay.style.pointerEvents = 'all';
+      fadeOverlay.style.opacity = '1';
+      setTimeout(() => {
+        show(currentIndex);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        fadeOverlay.style.opacity = '0';
+        setTimeout(() => { fadeOverlay.style.pointerEvents = 'none'; }, 550);
+      }, 380);
+    });
+    el.addEventListener('mouseenter', () => stalker.classList.add('hovering'));
+    strip.appendChild(el);
+  });
+}
+buildThumbs();
+
+// ── Scroll reveal ──
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add('in-view'); io.unobserve(en.target); }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

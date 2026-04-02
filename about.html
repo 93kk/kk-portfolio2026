@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — Kumi Koishi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Monsieur+La+Doulaise&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:           #080c16;
+      --card-bg:      #1e1e20;
+      --text-primary: #f0f0f0;
+      --text-muted:   #666;
+      --accent:       #FF0077;
+      --shadow-sm:    0 2px 20px rgba(0,0,0,0.5);
+      --shadow-lg:    0 16px 56px rgba(0,0,0,0.7);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* ── Background image reveal ── */
+    #bg-reveal {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: url('images/一覧/dream.png');
+      background-size: cover;
+      background-position: center;
+      pointer-events: none;
+      -webkit-mask-image: radial-gradient(circle 380px at -9999px -9999px, rgba(0,0,0,0.24) 0%, transparent 70%);
+      mask-image: radial-gradient(circle 380px at -9999px -9999px, rgba(0,0,0,0.24) 0%, transparent 70%);
+    }
+
+    /* ── Dot grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.14) 1.4px, transparent 1.4px);
+      background-size: 56px 56px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Ambient glow（マウス追従の温かい光）── */
+    #spotlight-glow {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,248,210,0.06) 0%, rgba(255,240,180,0.02) 45%, transparent 70%);
+      transform: translate(-50%, -50%);
+      left: 50%;
+      top: 40%;
+      transition: left 0.8s ease, top 0.8s ease;
+    }
+
+    /* ── Header ── */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      mix-blend-mode: difference;
+    }
+    .logo img {
+      height: 22px;
+      width: auto;
+      display: block;
+    }
+    .logo span {
+      font-size: 15px;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.45);
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .nav-links a {
+      position: relative;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a.active,
+    .nav-links a:hover {
+      color: rgba(255,255,255,0.9);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleX(0);
+      transform-origin: right center;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a.active::after,
+    .nav-links a:hover::after {
+      transform: translateY(-50%) scaleX(1);
+      transform-origin: left center;
+    }
+
+    /* ── Main ── */
+    main {
+      position: relative;
+      z-index: 1;
+      padding-top: 120px;
+      padding-bottom: 140px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 80px 72px 100px;
+      position: relative;
+    }
+    .hero-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 48px;
+    }
+    .hero-en {
+      font-family: 'Monsieur La Doulaise', cursive;
+      font-size: clamp(52px, 8.5vw, 120px);
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      line-height: 0.82;
+      color: var(--accent);
+    }
+    .hero-ja {
+      margin-top: 20px;
+      font-size: clamp(12px, 1.4vw, 18px);
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+    }
+    .hero-role {
+      margin-top: 40px;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+    .hero-scroll-line {
+      position: absolute;
+      bottom: 0;
+      left: 72px;
+      right: 72px;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── Section shared ── */
+    .section {
+      padding: 80px 72px;
+      position: relative;
+    }
+    .section + .section {
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .section-number {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.2);
+      margin-bottom: 48px;
+    }
+    .section-heading {
+      font-size: clamp(32px, 5vw, 60px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: var(--text-primary);
+      margin-bottom: 40px;
+    }
+
+    /* ── Bio ── */
+    .bio-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+    .bio-stats {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0 48px;
+    }
+    .bio-text p {
+      font-size: 15px;
+      line-height: 1.85;
+      color: rgba(255,255,255,0.52);
+      margin-bottom: 20px;
+    }
+    .bio-text p:last-child { margin-bottom: 0; }
+    .bio-text strong {
+      color: rgba(255,255,255,0.78);
+      font-weight: 500;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .stat-row:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+    .stat-value {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      text-align: right;
+    }
+
+    /* ── Skills ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .skill-block {
+      background: rgba(255,255,255,0.03);
+      padding: 36px 32px;
+      transition: background 0.3s;
+    }
+    .skill-block:hover {
+      background: rgba(255,255,255,0.055);
+    }
+    .skill-block-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .skill-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .skill-list li {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .skill-list li::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 1px;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    /* ── Philosophy ── */
+    .philosophy {
+      padding: 100px 72px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .philosophy-bg-text {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      font-size: 200px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.025);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+    .philosophy-quote {
+      position: relative;
+      font-size: clamp(22px, 3.5vw, 44px);
+      font-weight: 300;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.68);
+      letter-spacing: -0.01em;
+      max-width: 760px;
+    }
+    .philosophy-quote em {
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+    }
+    .philosophy-attr {
+      margin-top: 32px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .philosophy-attr::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    /* ── Contact CTA ── */
+    .contact-cta {
+      padding: 80px 72px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+    }
+    .contact-cta-text {
+      font-size: clamp(28px, 4vw, 52px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+    .contact-cta-text span {
+      color: rgba(255,255,255,0.22);
+    }
+    .cta-link {
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      padding: 16px 36px;
+      border: 1px solid rgba(255,255,255,0.18);
+      position: relative;
+      transition: color 0.25s, border-color 0.25s;
+      overflow: hidden;
+    }
+    .cta-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .cta-link:hover { border-color: var(--accent); }
+    .cta-link:hover::before { transform: scaleX(1); }
+    .cta-link span { position: relative; z-index: 1; }
+
+    /* ── Marquee ── */
+    #marquee-wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.04;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    #marquee-track {
+      display: inline-flex;
+      align-items: center;
+      animation: marquee-scroll 80s linear infinite;
+    }
+    #marquee-track span {
+      font-size: 200px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      padding-right: 120px;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── Fade overlay ── */
+    #fade-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: #000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ── Mouse stalker ── */
+    #cursor-stalker {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 56px;
+      height: 56px;
+      transform: translate(-50%, -50%);
+      left: -100px;
+      top: -100px;
+      opacity: 0;
+      transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.28);
+    }
+    #cursor-stalker.visible { opacity: 1; }
+    #cursor-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      transition: background 0.2s ease, width 0.2s ease, height 0.2s ease;
+    }
+    #cursor-stalker.hovering {
+      width: 58px;
+      height: 58px;
+    }
+    #cursor-stalker.hovering #cursor-dot {
+      background: rgba(255,255,255,0.9);
+      width: 8px;
+      height: 8px;
+    }
+
+    /* ── Chat bubbles (03 — Personality) ── */
+    .chat-area {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+    .chat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .chat-block-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chat-block-title::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .chat-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .chat-row.right {
+      justify-content: flex-end;
+    }
+    .chat-avatar {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255,0,119,0.12);
+      border: 1px solid rgba(255,0,119,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    /* 共通バブル */
+    .bubble {
+      position: relative;
+      max-width: 85%;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.09);
+      padding: 22px 26px;
+      font-size: 16px;
+      line-height: 1.85;
+      color: rgba(255,255,255,0.60);
+    }
+    /* 左バブル（受信スタイル）*/
+    .chat-row.left .bubble {
+      border-radius: 3px 18px 18px 18px;
+    }
+    /* 右バブル（送信スタイル）*/
+    .chat-row.right .bubble {
+      border-radius: 18px 3px 18px 18px;
+    }
+    /* 左テール — 枠線三角 */
+    .chat-row.left .bubble::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: -9px;
+      border-style: solid;
+      border-width: 8px 9px 8px 0;
+      border-color: transparent rgba(255,255,255,0.09) transparent transparent;
+    }
+    /* 左テール — 塗り三角 */
+    .chat-row.left .bubble::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      left: -7px;
+      border-style: solid;
+      border-width: 7px 8px 7px 0;
+      border-color: transparent #161923 transparent transparent;
+    }
+    /* 右テール — 枠線三角 */
+    .chat-row.right .bubble::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      right: -9px;
+      border-style: solid;
+      border-width: 8px 0 8px 9px;
+      border-color: transparent transparent transparent rgba(255,255,255,0.09);
+    }
+    /* 右テール — 塗り三角 */
+    .chat-row.right .bubble::after {
+      content: '';
+      position: absolute;
+      top: 13px;
+      right: -7px;
+      border-style: solid;
+      border-width: 7px 0 7px 8px;
+      border-color: transparent transparent transparent #161923;
+    }
+    .bubble-topic {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.86);
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .bubble p {
+      margin-bottom: 10px;
+    }
+    .bubble p:last-child { margin-bottom: 0; }
+
+    /* ── Scroll-in animation ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .reveal.in-view {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <a class="logo" href="index.html"><img src="images/name.svg" alt="Kumi Koishi"><span>/ Portfolio</span></a>
+  <nav class="nav-links">
+    <a href="about.html" class="active">about</a>
+    <a href="#contact">contact</a>
+  </nav>
+</div>
+
+<!-- Background image reveal -->
+<div id="bg-reveal"></div>
+
+<!-- Ambient glow -->
+<div id="spotlight-glow"></div>
+
+<!-- Main -->
+<main>
+
+  <!-- Hero -->
+  <section class="hero reveal">
+    <div class="hero-label">About me</div>
+    <h1 class="hero-en">
+      Imperfection is beauty,<br>madness is genius
+    </h1>
+    <p class="hero-ja">不完全は美しく、狂気は天才</p>
+    <p class="hero-role">Kumi Koishi &nbsp;·&nbsp; Web Designer &amp; Art Director</p>
+    <div class="hero-scroll-line"></div>
+  </section>
+
+  <!-- Bio -->
+  <section class="section reveal">
+    <div class="section-number">01 — Profile</div>
+    <div class="bio-grid">
+      <div class="bio-text">
+        <p>
+          <strong>デザインは、言葉より先に届く。</strong><br>
+          Webデザイン・UIデザインを中心に、ロゴやモーショングラフィックスまで幅広く手がけるデザイナーです。
+        </p>
+        <p>
+          視覚的な美しさと、使いやすさの両立を常に意識しながら、ブランドの世界観を丁寧に設計します。
+          AIツールも積極的に取り入れ、クリエイティブの幅を日々拡張しています。
+        </p>
+        <p>
+          「好きな仕事をすること」を軸に、一つひとつのプロジェクトと真剣に向き合っています。
+        </p>
+      </div>
+      <div class="bio-stats">
+        <div class="stat-row">
+          <span class="stat-label">Available</span>
+          <span class="stat-value" style="color:var(--accent);">Open to work</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="section reveal">
+    <div class="section-number">02 — Skills &amp; Tools</div>
+    <div class="skills-grid">
+      <div class="skill-block">
+        <div class="skill-block-label">Design</div>
+        <ul class="skill-list">
+          <li>Web Design</li>
+          <li>UI / UX Design</li>
+          <li>Art Direction</li>
+          <li>Logo Design</li>
+          <li>Illustration</li>
+        </ul>
+      </div>
+      <div class="skill-block">
+        <div class="skill-block-label">Motion</div>
+        <ul class="skill-list">
+          <li>Motion Graphics</li>
+          <li>Animation</li>
+          <li>CSS Animation</li>
+          <li>Micro Interaction</li>
+          <li>Storyboarding</li>
+        </ul>
+      </div>
+      <div class="skill-block">
+        <div class="skill-block-label">Tools</div>
+        <ul class="skill-list">
+          <li>Figma</li>
+          <li>Adobe Illustrator</li>
+          <li>Adobe Photoshop</li>
+          <li>After Effects</li>
+          <li>HTML / CSS / JS</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Personality / Chat bubbles -->
+  <section class="section reveal">
+    <div class="section-number">03 — Personality</div>
+    <div class="chat-area">
+
+      <!-- 好きなこと -->
+      <div class="chat-block">
+        <div class="chat-block-title">好きなこと</div>
+        <div class="chat-row left">
+          <div class="chat-avatar">K</div>
+          <div class="bubble">
+            <p>あーでもないこうでもないという、年齢や先輩後輩に縛られず、メンバーと対等に意見を出し合って一つのプロダクトを作った経験はとても苦しく、楽しかったです。</p>
+            <p>現状は試行錯誤して成果物を作っていくフェーズはAIが台頭していきそうですが、意思決定して責任を持つという人の価値は変わらないと思うので、決めていく審美眼を引き続き鍛えていきたいです。</p>
+          </div>
+        </div>
+        <div class="chat-row right">
+          <div class="bubble">
+            <div class="bubble-topic">新しいことをやる</div>
+            <p>アニメーションや3DCG、STUDIOやFigmaなど、前職ではやってこなかった技術に挑戦してきました。これからはデザインスキルの向上以外に、ビジネス視点を体現するデザイナーを目指していきます。</p>
+          </div>
+          <div class="chat-avatar">K</div>
+        </div>
+      </div>
+
+      <!-- 苦手なこと -->
+      <div class="chat-block">
+        <div class="chat-block-title">苦手なこと</div>
+        <div class="chat-row left">
+          <div class="chat-avatar">K</div>
+          <div class="bubble">
+            <p>高圧的な人と仕事をすることが苦手。</p>
+            <p>難しい言葉を羅列する人よりも、誰にでもわかる言葉で会話することが大切だと考えていますし、そういった方がいたら、私も気をつけようという戒めにしています。</p>
+          </div>
+        </div>
+        <div class="chat-row right">
+          <div class="bubble">
+            <div class="bubble-topic">自分が想像できない商材やサービス</div>
+            <p>効果が実感できる手触り感がない仕事が不安でした。</p>
+          </div>
+          <div class="chat-avatar">K</div>
+        </div>
+      </div>
+
+      <!-- やりたいこと -->
+      <div class="chat-block">
+        <div class="chat-block-title">やりたいこと</div>
+        <div class="chat-row left">
+          <div class="chat-avatar">K</div>
+          <div class="bubble">
+            <div class="bubble-topic">自分事化できる商材やサービス</div>
+            <p>育児・フェムテック・食・社会課題を変革するサービス</p>
+            <p>子供ができたことで、社会課題を解決するようなサービスやシステムに携わりたいと思っています。<br>そう、子供が愛おしすぎるのです。笑</p>
+            <p>日々色々なことが起き、まさにいま混沌としている社会の中で、希望が感じられません。子供が大きくなっても未来にワクワクできる社会にしてあげたい。幸せの形の選択肢をもっと広げられる社会であってほしいという思いがあります。</p>
+            <p>ただ、子供との時間も大切にしたいというのが本音。本当に短い子供との時間も確保しつつ、働いていきたいという思いがあります。</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Philosophy -->
+  <section class="philosophy reveal">
+    <div class="philosophy-bg-text">DESIGN</div>
+    <blockquote class="philosophy-quote">
+      To work on what I love<br>
+      is the <em>core principle</em><br>
+      of my life.
+    </blockquote>
+    <p class="philosophy-attr">Kumi Koishi</p>
+  </section>
+
+  <!-- Contact CTA -->
+  <div class="contact-cta reveal" id="contact">
+    <div class="contact-cta-text">
+      Let's work<br><span>together.</span>
+    </div>
+    <a href="mailto:hello@kumikoishi.com" class="cta-link">
+      <span>Get in touch</span>
+    </a>
+  </div>
+
+</main>
+
+<!-- Marquee -->
+<div id="marquee-wrap">
+  <div id="marquee-track">
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / Illustration / WF / AI</span>
+  </div>
+</div>
+
+<!-- Fade overlay -->
+<div id="fade-overlay"></div>
+
+<!-- Mouse stalker -->
+<div id="cursor-stalker"><div id="cursor-dot"></div></div>
+
+<script>
+  // ── Background image reveal（マウス追従）──────────────────
+  const bgReveal = document.getElementById('bg-reveal');
+  document.addEventListener('mousemove', e => {
+    const grad = `radial-gradient(circle 380px at ${e.clientX}px ${e.clientY}px, rgba(0,0,0,0.24) 0%, transparent 70%)`;
+    bgReveal.style.webkitMaskImage = grad;
+    bgReveal.style.maskImage = grad;
+  });
+
+  // ── Ambient glow（マウス追従）──────────────────────────────
+  const glow = document.getElementById('spotlight-glow');
+  document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top  = e.clientY + 'px';
+  });
+
+  // ── Mouse stalker ──────────────────────────────────────────
+  const stalker = document.getElementById('cursor-stalker');
+  let sx = -100, sy = -100, mx = -100, my = -100;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  document.addEventListener('mouseenter', () => stalker.classList.add('visible'));
+  document.addEventListener('mouseleave', () => stalker.classList.remove('visible'));
+  document.querySelectorAll('a, button, [role="button"]').forEach(el => {
+    el.addEventListener('mouseenter', () => stalker.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => stalker.classList.remove('hovering'));
+  });
+  (function loop() {
+    sx += (mx - sx) * 0.12;
+    sy += (my - sy) * 0.12;
+    stalker.style.left = sx + 'px';
+    stalker.style.top  = sy + 'px';
+    requestAnimationFrame(loop);
+  })();
+
+  // ── Scroll reveal ──────────────────────────────────────────
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.classList.add('in-view');
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  revealEls.forEach(el => io.observe(el));
+
+  // ── Page fade-in ───────────────────────────────────────────
+  const fadeEl = document.getElementById('fade-overlay');
+  fadeEl.style.opacity = '1';
+  fadeEl.style.transition = 'none';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      fadeEl.style.transition = 'opacity 0.6s ease';
+      fadeEl.style.opacity = '0';
+    });
+  });
+
+  // ── Page links fade-out ────────────────────────────────────
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href');
+    if (href && !href.startsWith('#') && !href.startsWith('mailto')) {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        fadeEl.style.transition = 'opacity 0.5s ease';
+        fadeEl.style.opacity = '1';
+        setTimeout(() => { window.location.href = href; }, 520);
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

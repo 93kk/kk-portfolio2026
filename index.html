@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Portfolio — Your Name</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #080c16;
+      --card-bg: #1e1e20;
+      --text-primary: #f0f0f0;
+      --text-muted: #666;
+      --shadow-sm: 0 2px 20px rgba(0,0,0,0.28);
+      --shadow-lg: 0 16px 56px rgba(0,0,0,0.42);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Dot grid background */
+    /* dot grid is on #world so it scrolls with the canvas */
+
+    /* Viewport */
+    #viewport {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      cursor: none;
+      z-index: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #viewport.dragging {
+      cursor: none;
+    }
+
+    /* World canvas */
+    #world {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 7200px;
+      height: 6000px;
+      will-change: transform;
+      transform-origin: 0 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.18) 1.4px, transparent 1.4px);
+      background-size: 56px 56px;
+    }
+
+    /* ─── Cards ─── */
+    .card {
+      position: absolute;
+      background: var(--card-bg);
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: var(--text-primary);
+      display: block;
+      filter: brightness(0.68);
+      /* 離れた時のスムーズ復帰 */
+      transition: box-shadow 0.5s ease, transform 0.65s cubic-bezier(0.23, 1, 0.32, 1), filter 0.4s ease;
+      will-change: transform;
+    }
+    .card:hover {
+      filter: brightness(0.88);
+    }
+    #viewport.dragging .card {
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: var(--shadow-sm) !important;
+    }
+
+
+    /* ─── Spotlight overlay ─── */
+    #spotlight-overlay {
+      position: fixed;
+      inset: 0;
+      background: #080c16;
+      z-index: 10;
+      pointer-events: none;
+      mask-image: radial-gradient(circle 520px at -9999px -9999px, transparent 0%, transparent 38%, rgba(8,12,22,0.25) 58%, rgba(8,12,22,0.72) 80%, #080c16 100%);
+      -webkit-mask-image: radial-gradient(circle 520px at -9999px -9999px, transparent 0%, transparent 38%, rgba(8,12,22,0.25) 58%, rgba(8,12,22,0.72) 80%, #080c16 100%);
+    }
+
+    /* ─── Spotlight warm glow ─── */
+    #spotlight-glow {
+      position: fixed;
+      pointer-events: none;
+      z-index: 11;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,248,210,0.10) 0%, rgba(255,240,180,0.04) 45%, transparent 70%);
+      transform: translate(-50%, -50%);
+      left: -9999px;
+      top: -9999px;
+    }
+
+    .card-thumb {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    .card-thumb-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease;
+      display: block;
+      overflow: hidden;
+    }
+    .card:hover .card-thumb-inner {
+      transform: scale(1.05);
+    }
+
+    .card-icon {
+      opacity: 0.22;
+    }
+
+    .card-body {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 9px 12px 11px;
+      background: rgba(12, 12, 14, 0.82);
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 5px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.88);
+    }
+    .card-year {
+      font-size: 12px;
+      color: rgba(255,255,255,0.32);
+      margin-top: 4px;
+    }
+
+    /* ─── Header ─── */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: all;
+      cursor: default;
+      mix-blend-mode: difference;
+    }
+    .logo img {
+      height: 22px;
+      width: auto;
+      display: block;
+    }
+    .logo span {
+      font-size: 15px;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.45);
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      pointer-events: all;
+    }
+    .nav-links a {
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a {
+      position: relative;
+    }
+    .nav-links a:hover {
+      color: rgba(255,255,255,0.9);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #FF0077;
+      transform: translateY(-50%) scaleX(0);
+      transform-origin: right center;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a:hover::after {
+      transform: translateY(-50%) scaleX(1);
+      transform-origin: left center;
+    }
+
+    /* ─── Minimap ─── */
+    #minimap {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 150px;
+      height: 120px;
+      z-index: 100;
+      pointer-events: none;
+      border-radius: 6px;
+      opacity: 0.88;
+    }
+
+    /* ─── Card count badge ─── */
+    #count-badge {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      font-size: 13px;
+      color: rgba(255,255,255,0.38);
+      z-index: 100;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    #count-badge strong {
+      color: rgba(255,255,255,0.55);
+      font-weight: 600;
+    }
+
+    /* ─── Tagline ─── */
+    #tagline {
+      position: fixed;
+      bottom: 28px;
+      left: 32px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.32);
+      letter-spacing: 0.04em;
+      z-index: 100;
+      pointer-events: none;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* ─── Marquee ─── */
+    #marquee-wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.045;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    #marquee-track {
+      display: inline-flex;
+      align-items: center;
+      animation: marquee-scroll 80s linear infinite;
+    }
+    #marquee-track span {
+      font-size: 200px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      padding-right: 120px;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── Fade overlay (暗転・明転) ─── */
+    #fade-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: #000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ─── Mouse stalker ─── */
+    #cursor-stalker {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 90px;
+      height: 90px;
+      transform: translate(-50%, -50%);
+      left: -100px;
+      top: -100px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #cursor-stalker.visible { opacity: 1; }
+    #cursor-stalker .stalker-ring {
+      animation: stalker-spin 9s linear infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    @keyframes stalker-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── BG Preview (card hover thumbnail) ─── */
+    #bg-preview {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    #bg-preview.visible {
+      opacity: 1;
+    }
+    #bg-preview-bg {
+      position: absolute;
+      inset: -8%;   /* はみ出させてブラーの四隅ボケを隠す */
+      background-size: cover;
+      background-position: center;
+      filter: blur(32px);
+      opacity: 0.30;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div class="logo"><img src="images/name.svg" alt="Kumi Koishi"><span>/ Portfolio</span></div>
+  <nav class="nav-links">
+    <a href="about.html">about</a>
+    <a href="#contact">contact</a>
+  </nav>
+</div>
+
+<!-- BG Preview -->
+<div id="bg-preview"><div id="bg-preview-bg"></div></div>
+
+<!-- Main viewport -->
+<div id="viewport">
+  <div id="world"></div>
+</div>
+
+<!-- Marquee -->
+<div id="marquee-wrap">
+  <div id="marquee-track">
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+  </div>
+</div>
+
+<!-- Spotlight -->
+<div id="spotlight-overlay"></div>
+<div id="spotlight-glow"></div>
+
+<!-- Card count -->
+<div id="count-badge"><strong id="count-num"></strong> works</div>
+
+<!-- Tagline -->
+<div id="tagline">To work on what I love is the core principle of my life.</div>
+
+<!-- Minimap -->
+<canvas id="minimap" width="150" height="120"></canvas>
+
+<!-- 暗転・明転オーバーレイ -->
+<div id="fade-overlay"></div>
+
+<!-- Mouse stalker -->
+<div id="cursor-stalker">
+  <svg width="90" height="90" viewBox="0 0 100 100" fill="none">
+    <defs>
+      <path id="stalker-circle" d="M50,50 m-40,0 a40,40 0 1,1 80,0 a40,40 0 1,1 -80,0"/>
+    </defs>
+    <!-- 回転するscreen.svg -->
+    <g class="stalker-ring">
+      <image href="images/screen.svg" x="0" y="0" width="100" height="100"/>
+    </g>
+    <!-- 固定の矢印 -->
+    <g stroke="rgba(255,255,255,0.65)" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="47,28 50,24 53,28" stroke-width="1.2"/>
+      <polyline points="47,72 50,76 53,72" stroke-width="1.2"/>
+      <polyline points="28,47 24,50 28,53" stroke-width="1.2"/>
+      <polyline points="72,47 76,50 72,53" stroke-width="1.2"/>
+    </g>
+  </svg>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  Portfolio Data
+// ─────────────────────────────────────────────
+const ITEMS = [
+  // 0
+  { tag:'Branding',           title:'Maison Verte — Visual Identity',   year:'2024', grad:['#FF6B6B','#FF8E53'], w:420, h:300, href:'#maison-verte', img:'images/tp-01.png' },
+  // 1
+  { tag:'Branding',           title:'AI SHIFT',       year:'2024', grad:['#4FACFE','#00C6FF'], w:390, h:270, href:'#ai-shift', img:'images/tp-07.png' },
+  // 2
+  { tag:'Branding',           title:'ALGORI',            year:'2023', grad:['#43E97B','#38F9D7'], w:450, h:330, href:'#algori', img:'images/tp-05.png' },
+  // 3  ← mv.svgから3番目近い (dist≈907)
+  { tag:'UI / UX',            title:'cloud tech ideathon',      year:'2024', grad:['#667EEA','#764BA2'], w:360, h:203, href:'#ideathon', img:'images/03.png' },
+  // 4
+  { tag:'UI / UX',            title:'Dashboard System — SaaS',          year:'2024', grad:['#11998E','#38EF7D'], w:480, h:330, href:'#dashboard', img:'images/10.png' },
+  // 5  ← mv.svgから5番目近い (dist≈1043)
+  { tag:'Illustration',       title:'conference',       year:'2024', grad:['#F7971E','#FFD200'], w:390, h:256, href:'#conference',   img:'images/tp-02.png' },
+  // 6  ← mv.svgから4番目近い (dist≈934)
+  { tag:'Illustration',       title:'guideline',          year:'2023', grad:['#373B44','#4286F4'], w:420, h:236, href:'#guideline', img:'images/04.png' },
+  // 7  ← mv.svgから最近傍 (dist≈631)
+  { tag:'Photography',        title:'sendai',        year:'2024', grad:['#1a1a2e','#16213E'], w:480, h:270, href:'#sendai',    img:'images/01.png' },
+  // 8  ← mv.svgから6番目近い (dist≈1100)
+  { tag:'Photography',        title:'UI',           year:'2023', grad:['#0F0C29','#302B63'], w:390, h:230, href:'#ui',  img:'images/tp-09.png' },
+  // 9
+  { tag:'Web Design',         title:'Nasce',   year:'2024', grad:['#8360C3','#2EBF91'], w:480, h:300, href:'#nasce',    img:'images/12.png'},
+  // 10  ← mv.svgから2番目近い (dist≈897)
+  { tag:'Web Design',         title:'TECH PLAY Banner',        year:'2023', grad:['#1D976C','#93F9B9'], w:450, h:290, href:'#tp-bnr', img:'images/02.png' },
+  // 11
+  { tag:'Print',              title:'Business card',     year:'2024', grad:['#C94B4B','#4B134F'], w:360, h:450, href:'#card', img:'images/11.png'  },
+];
+
+// ─────────────────────────────────────────────
+//  World dimensions
+// ─────────────────────────────────────────────
+const WORLD_W = 7200;
+const WORLD_H = 6000;
+
+// ─────────────────────────────────────────────
+//  Layout: 手動散らし配置（参照画像ベース）
+//  mv.svg (center: 2000, 1240) を囲むように各カードを明示的に配置
+//  mv.svg 占有域: x≈1499-2501, y≈739-1741 (1440px画面時)
+// ─────────────────────────────────────────────
+const contentCX = 2000;
+const contentCY = 1240;
+
+function layoutItems(items) {
+  // mv.svg 占有域: x≈1499-2501, y≈739-1741  (1440px画面, MV_W≈1002px)
+  // 各エリアに2〜3枚ずつ配置。カード間最低80px のギャップを確保。
+  //
+  //  bounds 早見表 (x_start, y_start, w, h → x_end = x+w, y_end = y+h):
+  //   0: (1140, 50,  420,~300) → 1560, ~350   上・中左
+  //   1: (2080, 60,  390,~270) → 2470, ~330   上・中右
+  //   2: ( 760, 800, 450,~330) → 1210, ~1130  左・MV横
+  //   3: (2700,1300, 360, 450) → 3060, 1750   右・MV中
+  //   4: (2720,  80, 480, 330) → 3200,  410   右上
+  //   5: (1180,1880, 390, 390) → 1570, 2270   下・左中
+  //   6: ( 680,1280, 420, 330) → 1100, 1610   左・MV下
+  //   7: (1800,1940, 480, 360) → 2280, 2300   下・中
+  //   8: (2440,1900, 390, 480) → 2830, 2380   下・右
+  //   9: ( 540,  80, 480, 300) →  920,  380   上・外左
+  //  10: (2680, 820, 450, 300) → 3130, 1120   右・MV上
+  //  11: ( 560,1900, 360, 450) →  920, 2350   下・外左
+  const positions = [
+    { x: 1140, y:   250 },   //  0: 上・中左
+    { x: 2080, y:  490 },    //  1: 上・中右
+    { x: 1400, y:  640 },    //  2: 左・MV横
+    { x: 2680, y: 1300 },    //  3: 右・MV中
+    { x: 2720, y:  280 },    //  4: 右上
+    { x: 1180, y: 1730 },    //  5: 下・左中
+    { x:  880, y: 1280 },    //  6: 左・MV下
+    { x: 1800, y: 1620 },    //  7: 下・中
+    { x: 2440, y: 1750 },    //  8: 下・右
+    { x:  540, y:  700 },    //  9: 上・外左
+    { x: 2500, y:  870 },    // 10: 右・MV上
+    { x:  560, y: 1700 },    // 11: 下・外左
+  ];
+
+  return items.map((item, i) => {
+    const pos = positions[i] ?? { x: contentCX, y: 2500 + (i - positions.length) * 420 };
+    return { ...item, x: pos.x, y: pos.y };
+  });
+}
+
+let CARDS; // 画像高さ確定後に layoutItems() で設定
+
+// ─────────────────────────────────────────────
+//  Build card icons per category
+// ─────────────────────────────────────────────
+function cardIcon(tag) {
+  const s = (path, extra='') =>
+    `<svg class="card-icon" width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${path}</svg>`;
+  if (tag === 'Branding')         return s('<circle cx="26" cy="26" r="18"/><circle cx="26" cy="26" r="8"/>');
+  if (tag === 'UI / UX')          return s('<rect x="8" y="12" width="36" height="28" rx="3"/><line x1="8" y1="20" x2="44" y2="20"/><circle cx="14" cy="16" r="2" fill="white"/>');
+  if (tag === 'Illustration')     return s('<path d="M10 40L20 20l8 14 6-10 8 16H10z"/>');
+  if (tag === 'Photography')      return s('<circle cx="26" cy="26" r="10"/><path d="M14 20a12 12 0 0 1 24 0v12a12 12 0 0 1-24 0V20z" opacity=".4"/><line x1="26" y1="8" x2="26" y2="4"/><line x1="26" y1="48" x2="26" y2="44"/>');
+  if (tag === 'Web Design')       return s('<rect x="6" y="10" width="40" height="32" rx="3"/><line x1="6" y1="18" x2="46" y2="18"/><rect x="12" y="24" width="14" height="12" rx="1" fill="white" opacity=".3"/>');
+  if (tag === 'Print')            return s('<rect x="10" y="8" width="24" height="32" rx="2"/><line x1="14" y1="16" x2="30" y2="16"/><line x1="14" y1="22" x2="30" y2="22"/><line x1="14" y1="28" x2="22" y2="28"/>');
+  if (tag === 'Motion')           return s('<circle cx="26" cy="26" r="18"/><polygon points="22,19 36,26 22,33" fill="white" opacity=".5"/>');
+  if (tag === '3D / Art Direction') return s('<path d="M26 8l18 10v16L26 44 8 34V18L26 8z"/><path d="M26 8v36M8 18l18 10 18-10" opacity=".4"/>');
+  if (tag === 'Type Design')      return s('<text x="8" y="40" font-size="38" font-weight="700" fill="white" opacity=".4" font-family="serif">A</text>');
+  return s('<rect x="12" y="12" width="28" height="28" rx="2"/><rect x="18" y="18" width="16" height="16" fill="white" opacity=".3"/>');
+}
+
+// ─────────────────────────────────────────────
+//  Render cards into DOM
+// ─────────────────────────────────────────────
+const world = document.getElementById('world');
+const bgPreview   = document.getElementById('bg-preview');
+const bgPreviewBg = document.getElementById('bg-preview-bg');
+
+// bounds & minimap vars (set in initCards after image preload)
+let contentLeft, contentTop, contentRight, contentBottom;
+let MM_OX, MM_OY, MM_CW, MM_CH, MM_SCALE;
+const mmImages = {};
+
+function initCards() {
+  CARDS.forEach((item, cardIndex) => {
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = item.href || '#';
+    a.style.cssText = `left:${item.x}px; top:${item.y}px; width:${item.w}px;`;
+
+    const grad = `linear-gradient(135deg, ${item.grad.join(', ')})`;
+    const thumbContent = item.img
+      ? `<img src="${item.img}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+      : `<div style="width:100%;height:100%;background:${grad};display:flex;align-items:center;justify-content:center;">${cardIcon(item.tag)}</div>`;
+
+    a.innerHTML = `
+      <div class="card-thumb" style="height:${item.h}px">
+        <div class="card-thumb-inner" style="height:${item.h}px">
+          ${thumbContent}
+        </div>
+      </div>`;
+
+    // ── 3D Tilt ──
+    const MAX_TILT = 9; // degrees
+
+    a.addEventListener('mouseenter', () => {
+      if (isDragging) return;
+      if (item.img) {
+        bgPreviewBg.style.backgroundImage = `url(${item.img})`;
+      } else {
+        bgPreviewBg.style.backgroundImage = `linear-gradient(135deg, ${item.grad.join(', ')})`;
+      }
+      bgPreview.classList.add('visible');
+    });
+
+    a.addEventListener('mousemove', e => {
+      if (isDragging) return;
+      a.style.transition = 'box-shadow 0.2s ease';
+      const r = a.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
+      const dy = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
+      a.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg) scale(1.04) translateZ(8px)`;
+      a.style.boxShadow = '0 20px 56px rgba(0,0,0,0.28)';
+    });
+
+    a.addEventListener('mouseleave', () => {
+      a.style.transition = 'box-shadow 0.5s ease, transform 0.65s cubic-bezier(0.23, 1, 0.32, 1)';
+      a.style.transform = '';
+      a.style.boxShadow = '';
+      bgPreview.classList.remove('visible');
+    });
+
+    // カードデータを要素に保持（window mouseup で参照）
+    a._item = item;
+    a._idx  = cardIndex;
+
+    world.appendChild(a);
+  });
+
+  document.getElementById('count-num').textContent = CARDS.length;
+
+  // bounds（カード本体 + テキストエリア約78px）
+  const CARD_BODY_H = 78;
+  contentLeft   = Math.min(...CARDS.map(c => c.x));
+  contentTop    = Math.min(...CARDS.map(c => c.y));
+  contentRight  = Math.max(...CARDS.map(c => c.x + c.w));
+  contentBottom = Math.max(...CARDS.map(c => c.y + c.h + CARD_BODY_H));
+
+  // minimap スケール変数
+  MM_OX    = contentLeft  - MM_PAD;
+  MM_OY    = contentTop   - MM_PAD;
+  MM_CW    = (contentRight  - contentLeft) + MM_PAD * 2;
+  MM_CH    = (contentBottom - contentTop)  + MM_PAD * 2;
+  MM_SCALE = Math.min(MM_W / MM_CW, MM_H / MM_CH);
+
+  // minimap 用画像プリロード
+  CARDS.forEach((card, i) => {
+    if (!card.img) return;
+    const img = new Image();
+    img.onload = () => { mmImages[i] = img; drawMinimap(); };
+    img.src = card.img;
+  });
+
+  clampWorld();
+  applyTransform();
+} // end initCards
+
+// 画像の自然な比率に合わせて ITEMS の item.h を更新し、その後レイアウトを計算して描画
+{
+  const imgItems = ITEMS.filter(c => c.img);
+  let pending = imgItems.length;
+  if (!pending) {
+    CARDS = layoutItems(ITEMS);
+    initCards();
+  } else {
+    imgItems.forEach(item => {
+      const _img = new Image();
+      _img.onload = () => {
+        item.h = Math.round(item.w * _img.naturalHeight / _img.naturalWidth);
+        if (--pending === 0) {
+          CARDS = layoutItems(ITEMS); // 実際の高さで再レイアウト
+          initCards();
+        }
+      };
+      _img.onerror = () => {
+        if (--pending === 0) {
+          CARDS = layoutItems(ITEMS);
+          initCards();
+        }
+      };
+      _img.src = item.img;
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+//  Pan & Inertia
+// ─────────────────────────────────────────────
+const viewport = document.getElementById('viewport');
+
+let wx = 0, wy = 0;          // world translate
+let scale = 0.72;            // initial zoom-out so cards peek from all sides
+let velX = 0, velY = 0;
+let isDragging = false;
+let didDrag = false;          // moved enough to suppress click
+let dragStartX = 0, dragStartY = 0;
+let clickTargetCard = null;   // card element pressed on mousedown
+let lastX = 0, lastY = 0;
+let lastT = 0;
+let rafId = null;
+
+wx = window.innerWidth  / 2 - contentCX * scale;
+wy = window.innerHeight / 2 - contentCY * scale;
+
+// ─────────────────────────────────────────────
+//  Place mv.svg at the initial view center
+// ─────────────────────────────────────────────
+function getMVSize() { return Math.min(Math.round(window.innerWidth * 0.58 * 1.2), 1080); }
+let MV_W = getMVSize();
+let MV_H = MV_W;
+const mvEl = document.createElement('img');
+mvEl.src = 'images/mv.svg';
+function updateMV() {
+  MV_W = MV_H = getMVSize();
+  mvEl.style.width  = MV_W + 'px';
+  mvEl.style.height = MV_H + 'px';
+  mvEl.style.left   = (contentCX - MV_W / 2) + 'px';
+  mvEl.style.top    = (contentCY - MV_H / 2) + 'px';
+}
+mvEl.style.cssText = `position:absolute; pointer-events:none; z-index:0;`;
+updateMV();
+world.insertBefore(mvEl, world.firstChild);
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function clampWorld() {
+  const padX = window.innerWidth  / 4 - 60;
+  const padY = window.innerHeight / 4 - 60;
+  wx = clamp(wx, window.innerWidth  - contentRight  * scale - padX, -contentLeft  * scale + padX);
+  wy = clamp(wy, window.innerHeight - contentBottom * scale - padY, -contentTop   * scale + padY);
+}
+
+// ─────────────────────────────────────────────
+//  Minimap
+// ─────────────────────────────────────────────
+const mmCanvas = document.getElementById('minimap');
+const mmCtx    = mmCanvas.getContext('2d');
+const MM_W = 150, MM_H = 120;
+mmCanvas.width  = MM_W;
+mmCanvas.height = MM_H;
+// Zoom in on the content area (not the full 7200x6000 world)
+const MM_PAD = 120;
+// MM_OX/OY/CW/CH/SCALE は initCards() 内で set される（let 宣言済み）
+
+function drawMinimap() {
+  mmCtx.clearRect(0, 0, MM_W, MM_H);
+
+  // background
+  mmCtx.fillStyle = 'rgba(24,24,27,0.92)';
+  mmCtx.beginPath();
+  mmCtx.roundRect(0, 0, MM_W, MM_H, 8);
+  mmCtx.fill();
+
+  // border
+  mmCtx.strokeStyle = 'rgba(255,255,255,0.14)';
+  mmCtx.lineWidth = 1;
+  mmCtx.beginPath();
+  mmCtx.roundRect(0.5, 0.5, MM_W-1, MM_H-1, 8);
+  mmCtx.stroke();
+
+  // helper: world coord → minimap pixel
+  const mx = x => (x - MM_OX) * MM_SCALE;
+  const my = y => (y - MM_OY) * MM_SCALE;
+
+  // mv.svg indicator
+  mmCtx.fillStyle = 'rgba(255,255,255,0.12)';
+  mmCtx.fillRect(
+    mx(contentCX - MV_W/2), my(contentCY - MV_H/2),
+    MV_W * MM_SCALE, MV_H * MM_SCALE
+  );
+
+  // cards — image or gradient
+  CARDS.forEach((card, i) => {
+    const cx = mx(card.x);
+    const cy = my(card.y);
+    const cw = Math.max(card.w * MM_SCALE, 2);
+    const ch = Math.max(card.h * MM_SCALE, 2);
+
+    if (mmImages[i]) {
+      mmCtx.drawImage(mmImages[i], cx, cy, cw, ch);
+    } else {
+      const g = mmCtx.createLinearGradient(cx, cy, cx + cw, cy + ch);
+      g.addColorStop(0, card.grad[0]);
+      g.addColorStop(1, card.grad[1]);
+      mmCtx.fillStyle = g;
+      mmCtx.fillRect(cx, cy, cw, ch);
+    }
+  });
+
+  // viewport rect (account for scale: visible world area = screen / scale)
+  const vx = mx(-wx / scale);
+  const vy = my(-wy / scale);
+  const vw = (window.innerWidth  / scale) * MM_SCALE;
+  const vh = (window.innerHeight / scale) * MM_SCALE;
+  // viewport fill tint
+  mmCtx.fillStyle = 'rgba(255,255,255,0.06)';
+  mmCtx.fillRect(vx, vy, vw, vh);
+  // viewport border
+  mmCtx.strokeStyle = 'rgba(255,255,255,0.80)';
+  mmCtx.lineWidth = 1.5;
+  mmCtx.strokeRect(vx + 0.75, vy + 0.75, vw - 1.5, vh - 1.5);
+}
+
+function applyTransform() {
+  world.style.transformOrigin = '0 0';
+  world.style.transform = `translate(${wx}px,${wy}px) scale(${scale})`;
+  drawMinimap();
+}
+// ── Mouse ──
+viewport.addEventListener('mousedown', e => {
+  isDragging = true;
+  didDrag = false;
+  clickTargetCard = e.target.closest('.card');
+  // ドラッグ開始時にチルトをリセット
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.transition = '';
+    c.style.transform = '';
+    c.style.boxShadow = '';
+  });
+  lastX = e.clientX;
+  lastY = e.clientY;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  lastT = performance.now();
+  velX = velY = 0;
+  viewport.classList.add('dragging');
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  e.preventDefault();
+});
+
+// ─────────────────────────────────────────────
+//  Spotlight / Mouse Stalker
+// ─────────────────────────────────────────────
+const spotOverlay = document.getElementById('spotlight-overlay');
+const spotGlow    = document.getElementById('spotlight-glow');
+let spotRaf = null;
+const SPOT_R = 660;
+
+function applySpotlight(x, y) {
+  const grad = `radial-gradient(circle ${SPOT_R}px at ${x}px ${y}px, transparent 0%, transparent 38%, rgba(8,12,22,0.25) 58%, rgba(8,12,22,0.72) 80%, #080c16 100%)`;
+  spotOverlay.style.webkitMaskImage = grad;
+  spotOverlay.style.maskImage = grad;
+  spotGlow.style.left = x + 'px';
+  spotGlow.style.top  = y + 'px';
+  spotRaf = null;
+}
+
+function moveSpotlight(x, y) {
+  if (spotRaf) return;
+  spotRaf = requestAnimationFrame(() => applySpotlight(x, y));
+}
+
+// 初期状態：画面中央にスポットライトを当ててロゴを表示
+applySpotlight(window.innerWidth / 2, window.innerHeight / 2);
+
+viewport.addEventListener('mousemove', e => moveSpotlight(e.clientX, e.clientY));
+document.body.addEventListener('mouseleave', () => {
+  spotOverlay.style.webkitMaskImage = '';
+  spotOverlay.style.maskImage = '';
+  spotGlow.style.left = '-9999px';
+  spotGlow.style.top  = '-9999px';
+});
+
+window.addEventListener('mousemove', e => {
+  moveSpotlight(e.clientX, e.clientY);
+  if (!isDragging) return;
+  const dx = e.clientX - lastX;
+  const dy = e.clientY - lastY;
+  const now = performance.now();
+  const dt = Math.max(1, now - lastT);
+  velX = dx / dt * 16;
+  velY = dy / dt * 16;
+  wx += dx; wy += dy;
+  lastX = e.clientX; lastY = e.clientY; lastT = now;
+  if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) > 8) didDrag = true;
+  clampWorld();
+  applyTransform();
+});
+
+window.addEventListener('mouseup', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  viewport.classList.remove('dragging');
+
+  // カードへのクリック判定（ドラッグなし & 対象カードあり）
+  if (!didDrag && clickTargetCard) {
+    const card = clickTargetCard;
+    clickTargetCard = null;
+    openDetail(card._item, card, card._idx);
+    return;
+  }
+  clickTargetCard = null;
+  runInertia();
+});
+
+// Suppress clicks after drag
+viewport.addEventListener('click', e => {
+  if (didDrag) { e.preventDefault(); e.stopPropagation(); }
+}, true);
+
+// ── Touch ──
+let touchStart = { x:0, y:0 };
+viewport.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  touchStart = { x:t.clientX, y:t.clientY };
+  lastX = t.clientX; lastY = t.clientY; lastT = performance.now();
+  velX = velY = 0; didDrag = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}, { passive:true });
+
+viewport.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  const dx = t.clientX - lastX;
+  const dy = t.clientY - lastY;
+  const now = performance.now();
+  const dt = Math.max(1, now - lastT);
+  velX = dx / dt * 16; velY = dy / dt * 16;
+  wx += dx; wy += dy;
+  lastX = t.clientX; lastY = t.clientY; lastT = now;
+  if (Math.abs(t.clientX - touchStart.x) > 4 || Math.abs(t.clientY - touchStart.y) > 4) didDrag = true;
+  clampWorld();
+  applyTransform();
+  e.preventDefault();
+}, { passive:false });
+
+viewport.addEventListener('touchend', () => {
+  runInertia();
+}, { passive:true });
+
+// ── Wheel / Trackpad ──
+viewport.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (e.ctrlKey) return; // pinch-to-zoom on Mac trackpad — ignore
+  wx -= e.deltaX;
+  wy -= e.deltaY;
+  clampWorld();
+  applyTransform();
+}, { passive: false });
+
+// ── Inertia ──
+function runInertia() {
+  if (rafId) cancelAnimationFrame(rafId);
+  const FRICTION = 0.91;
+  function step() {
+    velX *= FRICTION;
+    velY *= FRICTION;
+    if (Math.abs(velX) < 0.08 && Math.abs(velY) < 0.08) return;
+    wx += velX; wy += velY;
+    clampWorld();
+    applyTransform();
+    rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+}
+
+function animateTo(toX, toY, duration) {
+  if (rafId) cancelAnimationFrame(rafId);
+  const fromX = wx, fromY = wy;
+  const start = performance.now();
+  function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    wx = fromX + (toX - fromX) * ease(t);
+    wy = fromY + (toY - fromY) * ease(t);
+    clampWorld();
+    applyTransform();
+    if (t < 1) rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+}
+
+// ─────────────────────────────────────────────
+//  Keyboard navigation
+// ─────────────────────────────────────────────
+const KEY_SPEED = 18;
+const keysDown = new Set();
+(function keyLoop() {
+  if (keysDown.size) {
+    let dx = 0, dy = 0;
+    if (keysDown.has('ArrowLeft')  || keysDown.has('a')) dx =  KEY_SPEED;
+    if (keysDown.has('ArrowRight') || keysDown.has('d')) dx = -KEY_SPEED;
+    if (keysDown.has('ArrowUp')    || keysDown.has('w')) dy =  KEY_SPEED;
+    if (keysDown.has('ArrowDown')  || keysDown.has('s')) dy = -KEY_SPEED;
+    if (dx || dy) { wx += dx; wy += dy; clampWorld(); applyTransform(); }
+  }
+  requestAnimationFrame(keyLoop);
+})();
+window.addEventListener('keydown', e => {
+  keysDown.add(e.key);
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+});
+window.addEventListener('keyup', e => keysDown.delete(e.key));
+
+// ─────────────────────────────────────────────
+//  Transition to detail page (暗転)
+// ─────────────────────────────────────────────
+const fadeOverlay = document.getElementById('fade-overlay');
+
+function openDetail(item, cardEl, idx) {
+  // Save viewport state for return animation (明転)
+  sessionStorage.setItem('pfTransition', JSON.stringify({
+    wx, wy, scale, idx,
+    img: item.img || null,
+    grad: item.grad
+  }));
+
+  // 画面を暗転させてからページ遷移
+  fadeOverlay.style.pointerEvents = 'all';
+  fadeOverlay.style.opacity = '1';
+  setTimeout(() => {
+    window.location.href = `detail.html?id=${idx}`;
+  }, 550);
+}
+
+// ─────────────────────────────────────────────
+//  Mouse stalker
+// ─────────────────────────────────────────────
+const stalker = document.getElementById('cursor-stalker');
+let csX = -100, csY = -100, csTX = -100, csTY = -100;
+
+viewport.addEventListener('mouseenter', () => stalker.classList.add('visible'));
+viewport.addEventListener('mouseleave', () => stalker.classList.remove('visible'));
+window.addEventListener('mousemove', e => { csTX = e.clientX; csTY = e.clientY; });
+
+(function animStalker() {
+  csX += (csTX - csX) * 0.12;
+  csY += (csTY - csY) * 0.12;
+  stalker.style.left = csX + 'px';
+  stalker.style.top  = csY + 'px';
+  requestAnimationFrame(animStalker);
+})();
+
+// ─────────────────────────────────────────────
+//  Resize
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  updateMV();
+  clampWorld();
+  applyTransform();
+  drawMinimap();
+});
+
+// ─────────────────────────────────────────────
+//  詳細ページから戻った時の明転アニメーション
+// ─────────────────────────────────────────────
+const pfReturn = sessionStorage.getItem('pfReturn');
+if (pfReturn) {
+  sessionStorage.removeItem('pfReturn');
+  const ret = JSON.parse(pfReturn);
+
+  // ビューポートを元の位置に戻す
+  wx = ret.wx; wy = ret.wy; scale = ret.scale;
+  clampWorld(); applyTransform();
+
+  // 黒から明転
+  fadeOverlay.style.transition = 'none';
+  fadeOverlay.style.opacity = '1';
+  setTimeout(() => {
+    fadeOverlay.style.transition = 'opacity 0.5s ease';
+    fadeOverlay.style.opacity = '0';
+    setTimeout(() => { fadeOverlay.style.pointerEvents = 'none'; }, 550);
+  }, 50);
+}
+
+// ─────────────────────────────────────────────
+//  Nav links — フェードアウト遷移
+// ─────────────────────────────────────────────
+document.querySelectorAll('.nav-links a[href]').forEach(a => {
+  const href = a.getAttribute('href');
+  if (href && !href.startsWith('#')) {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      fadeOverlay.style.pointerEvents = 'all';
+      fadeOverlay.style.opacity = '1';
+      setTimeout(() => { window.location.href = href; }, 520);
+    });
+  }
+});
+</script>
+</body>
+</html>

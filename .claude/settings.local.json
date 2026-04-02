@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:tokyo-haneda.com)",
+      "Bash(file /Users/kumi/Desktop/claude/code/images/*)",
+      "Bash(npm create:*)",
+      "Bash(npx create-vite@latest . --template react --yes)",
+      "Bash(brew list:*)",
+      "WebFetch(domain:story120.masunaga1905.com)",
+      "Bash(npm install:*)",
+      "Read(//Users/kumi/Desktop/claude/code/**)",
+      "Bash(python3 /tmp/update_detail.py)",
+      "Bash(node -e \":*)"
+    ]
+  }
+}

@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio — Your Name</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #080c16;
+      --card-bg: #1e1e20;
+      --text-primary: #f0f0f0;
+      --text-muted: #666;
+      --shadow-sm: 0 2px 20px rgba(0,0,0,0.5);
+      --shadow-lg: 0 16px 56px rgba(0,0,0,0.7);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Dot grid background */
+    /* dot grid is on #world so it scrolls with the canvas */
+
+    /* Viewport */
+    #viewport {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      cursor: none;
+      z-index: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #viewport.dragging {
+      cursor: none;
+    }
+
+    /* World canvas */
+    #world {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 7200px;
+      height: 6000px;
+      will-change: transform;
+      transform-origin: 0 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.18) 1.4px, transparent 1.4px);
+      background-size: 56px 56px;
+    }
+
+    /* ─── Cards ─── */
+    .card {
+      position: absolute;
+      background: var(--card-bg);
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: var(--text-primary);
+      display: block;
+      filter: brightness(0.68);
+      /* 離れた時のスムーズ復帰 */
+      transition: box-shadow 0.5s ease, transform 0.65s cubic-bezier(0.23, 1, 0.32, 1), filter 0.4s ease;
+      will-change: transform;
+    }
+    .card:hover {
+      filter: brightness(0.88);
+    }
+    #viewport.dragging .card {
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: var(--shadow-sm) !important;
+    }
+
+
+    /* ─── Spotlight overlay ─── */
+    #spotlight-overlay {
+      position: fixed;
+      inset: 0;
+      background: #080c16;
+      z-index: 10;
+      pointer-events: none;
+      mask-image: radial-gradient(circle 520px at -9999px -9999px, transparent 0%, transparent 38%, rgba(8,12,22,0.25) 58%, rgba(8,12,22,0.72) 80%, #080c16 100%);
+      -webkit-mask-image: radial-gradient(circle 520px at -9999px -9999px, transparent 0%, transparent 38%, rgba(8,12,22,0.25) 58%, rgba(8,12,22,0.72) 80%, #080c16 100%);
+    }
+
+    /* ─── Spotlight warm glow ─── */
+    #spotlight-glow {
+      position: fixed;
+      pointer-events: none;
+      z-index: 11;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,248,210,0.10) 0%, rgba(255,240,180,0.04) 45%, transparent 70%);
+      transform: translate(-50%, -50%);
+      left: -9999px;
+      top: -9999px;
+    }
+
+    .card-thumb {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    .card-thumb-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card:hover .card-thumb-inner {
+      transform: scale(1.05);
+    }
+
+    .card-icon {
+      opacity: 0.22;
+    }
+
+    .card-body {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 13px 16px 16px;
+      background: rgba(12, 12, 14, 0.82);
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 5px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.88);
+    }
+    .card-year {
+      font-size: 12px;
+      color: rgba(255,255,255,0.32);
+      margin-top: 4px;
+    }
+
+    /* ─── Header ─── */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .logo {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      pointer-events: all;
+      cursor: default;
+    }
+    .logo span {
+      font-weight: 300;
+      color: #555;
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      pointer-events: all;
+    }
+    .nav-links a {
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ─── Minimap ─── */
+    #minimap {
+      position: fixed;
+      bottom: 72px;
+      right: 24px;
+      width: 150px;
+      height: 120px;
+      z-index: 100;
+      pointer-events: none;
+      border-radius: 6px;
+      opacity: 0.88;
+    }
+
+    /* ─── Card count badge ─── */
+    #count-badge {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      font-size: 13px;
+      color: rgba(255,255,255,0.38);
+      z-index: 100;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    #count-badge strong {
+      color: rgba(255,255,255,0.55);
+      font-weight: 600;
+    }
+
+    /* ─── Tagline ─── */
+    #tagline {
+      position: fixed;
+      bottom: 28px;
+      left: 32px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.32);
+      letter-spacing: 0.04em;
+      z-index: 100;
+      pointer-events: none;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* ─── Marquee ─── */
+    #marquee-wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.045;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    #marquee-track {
+      display: inline-flex;
+      align-items: center;
+      animation: marquee-scroll 80s linear infinite;
+    }
+    #marquee-track span {
+      font-size: 200px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      padding-right: 120px;
+    }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── Transition overlay (card → detail page) ─── */
+    #detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: #080c16;
+      pointer-events: none;
+      clip-path: inset(50% 50% 50% 50% round 0px);
+      overflow: hidden;
+    }
+    #detail-overlay-grad {
+      position: absolute;
+      inset: 0;
+    }
+    #detail-overlay-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ─── Mouse stalker ─── */
+    #cursor-stalker {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 48px;
+      height: 48px;
+      transform: translate(-50%, -50%);
+      left: -100px;
+      top: -100px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #cursor-stalker.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div class="logo">Your Name <span>/ Portfolio</span></div>
+  <nav class="nav-links">
+    <a href="#about">about</a>
+    <a href="#contact">contact</a>
+  </nav>
+</div>
+
+<!-- Main viewport -->
+<div id="viewport">
+  <div id="world"></div>
+</div>
+
+<!-- Marquee -->
+<div id="marquee-wrap">
+  <div id="marquee-track">
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+    <span>Web design / Logo / Animation / / Illustration / WF / AI</span>
+  </div>
+</div>
+
+<!-- Spotlight -->
+<div id="spotlight-overlay"></div>
+<div id="spotlight-glow"></div>
+
+<!-- Card count -->
+<div id="count-badge"><strong id="count-num"></strong> works</div>
+
+<!-- Tagline -->
+<div id="tagline">To work on what I love is the core principle of my life.</div>
+
+<!-- Minimap -->
+<canvas id="minimap" width="150" height="120"></canvas>
+
+<!-- Transition overlay -->
+<div id="detail-overlay">
+  <div id="detail-overlay-grad"></div>
+  <img id="detail-overlay-img" src="" alt="" style="display:none;">
+</div>
+
+<!-- Mouse stalker -->
+<div id="cursor-stalker">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="rgba(255,255,255,0.65)" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="24" cy="24" r="21" stroke-width="1"/>
+    <polyline points="21,9 24,5 27,9" stroke-width="1.2"/>
+    <polyline points="21,39 24,43 27,39" stroke-width="1.2"/>
+    <polyline points="9,21 5,24 9,27" stroke-width="1.2"/>
+    <polyline points="39,21 43,24 39,27" stroke-width="1.2"/>
+  </svg>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  Portfolio Data
+// ─────────────────────────────────────────────
+const ITEMS = [
+  // Branding
+  { tag:'Branding', title:'Maison Verte — Visual Identity',   year:'2024', grad:['#FF6B6B','#FF8E53'], w:420, h:300, href:'#maison-verte', img:'images/tp-01.png', x:1100, y:1090 },
+  { tag:'Branding', title:'Koto Studio — Brand System',       year:'2024', grad:['#4FACFE','#00C6FF'], w:390, h:270, href:'#koto-studio', img:'images/tp-02.png', x:1805, y:475 },
+  { tag:'Branding', title:'Arkadia — Logo Design',            year:'2023', grad:['#43E97B','#38F9D7'], w:450, h:330, href:'#arkadia', img:'images/tp-03.png' },
+
+  // UI/UX
+  { tag:'UI / UX', title:'Fintech App — Mobile Design',       year:'2024', grad:['#667EEA','#764BA2'], w:360, h:450, href:'#fintech' },
+  { tag:'UI / UX', title:'Dashboard System — SaaS',           year:'2024', grad:['#11998E','#38EF7D'], w:480, h:330, href:'#dashboard', x:1760, y:1730 },
+
+  // Illustration
+  { tag:'Illustration', title:'Tokyo Series — Digital Art',   year:'2024', grad:['#F7971E','#FFD200'], w:390, h:390, href:'#tokyo' },
+  { tag:'Illustration', title:'Abstract Patterns Vol.3',      year:'2023', grad:['#373B44','#4286F4'], w:420, h:330, href:'#abstract' },
+
+  // Photography
+  { tag:'Photography', title:'Architecture — Tokyo 2024',     year:'2024', grad:['#1a1a2e','#16213E'], w:480, h:360, href:'#arch', x:2480, y:1060 },
+  { tag:'Photography', title:'Street Life — Shinjuku',        year:'2023', grad:['#0F0C29','#302B63'], w:390, h:480, href:'#street' },
+
+  // Web Design
+  { tag:'Web Design', title:'Agency Website — Full Redesign', year:'2024', grad:['#8360C3','#2EBF91'], w:480, h:300, href:'#agency' },
+  { tag:'Web Design', title:'Restaurant Site — Minimal',      year:'2023', grad:['#1D976C','#93F9B9'], w:450, h:300, href:'#restaurant' },
+
+  // Print
+  { tag:'Print', title:'Annual Report — Luxury Brand',        year:'2024', grad:['#C94B4B','#4B134F'], w:360, h:450, href:'#annual' },
+
+  // Motion
+  { tag:'Motion', title:'Brand Animation — Intro',            year:'2024', grad:['#ED213A','#93291E'], w:420, h:300, href:'#anim' },
+
+  // 3D
+  { tag:'3D / Art Direction', title:'Product Visualization',  year:'2024', grad:['#000428','#004E92'], w:450, h:330, href:'#product' },
+
+  // Type
+  { tag:'Type Design', title:'Neue Display — Typeface',       year:'2024', grad:['#1a1a1a','#555555'], w:420, h:300, href:'#neue' },
+];
+
+// ─────────────────────────────────────────────
+//  World dimensions
+// ─────────────────────────────────────────────
+const WORLD_W = 7200;
+const WORLD_H = 6000;
+
+// ─────────────────────────────────────────────
+//  Layout: seeded pseudo-random jitter
+// ─────────────────────────────────────────────
+function makeRand(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = Math.imul(1664525, s) + 1013904223 >>> 0;
+    return s / 0xFFFFFFFF;
+  };
+}
+
+// layoutItems より前に定義が必要
+const contentCX = 600 + 2 * 700;  // 2000
+const contentCY = 1240;
+
+function layoutItems(items) {
+  const rand = makeRand(137);
+  const MV_HALF  = 390;  // mv.svg 周囲のデッドゾーン半径
+  const GAP      = 60;   // mv.svg との余白
+  const CARD_PAD = 50;   // カード間最小余白
+
+  // mv.svg（中心: 2000, 1240）の四方のゾーン
+  const DX1 = contentCX - MV_HALF - GAP;  // ~1550
+  const DX2 = contentCX + MV_HALF + GAP;  // ~2450
+  const DY1 = contentCY - MV_HALF - GAP;  // ~790
+  const DY2 = contentCY + MV_HALF + GAP;  // ~1690
+  const ZONES = [
+    { xMin: 500,  xMax: 3600, yMin: 160, yMax: DY1  },   // TOP
+    { xMin: 500,  xMax: 3600, yMin: DY2, yMax: 2500 },   // BOT
+    { xMin: 500,  xMax: DX1,  yMin: DY1, yMax: DY2  },   // LEFT
+    { xMin: DX2,  xMax: 3600, yMin: DY1, yMax: DY2  },   // RIGHT
+  ];
+
+  const placed = [];
+  function overlaps(x, y, w, h) {
+    return placed.some(p =>
+      x < p.x + p.w + CARD_PAD && x + w + CARD_PAD > p.x &&
+      y < p.y + p.h + CARD_PAD && y + h + CARD_PAD > p.y
+    );
+  }
+
+  // プリセットを先に全て登録しておく（散布時に衝突回避できるよう）
+  items.forEach(item => {
+    if ('x' in item && 'y' in item) placed.push({ x:item.x, y:item.y, w:item.w, h:item.h });
+  });
+
+  let zoneIdx = 0;
+  return items.map((item) => {
+    if ('x' in item && 'y' in item) return { ...item };
+    // ゾーンが満杯なら次のゾーンへ回す
+    let x = null, y = null;
+    for (let zi = 0; zi < ZONES.length; zi++) {
+      const zone = ZONES[(zoneIdx + zi) % ZONES.length];
+      const xRange = zone.xMax - zone.xMin - item.w;
+      const yRange = zone.yMax - zone.yMin - item.h;
+      if (xRange <= 0 || yRange <= 0) continue;
+      for (let t = 0; t < 160; t++) {
+        const tx = Math.round(zone.xMin + rand() * xRange);
+        const ty = Math.round(zone.yMin + rand() * yRange);
+        if (!overlaps(tx, ty, item.w, item.h)) { x = tx; y = ty; break; }
+      }
+      if (x !== null) break;
+    }
+    if (x === null) { x = ZONES[zoneIdx % ZONES.length].xMin; y = ZONES[zoneIdx % ZONES.length].yMin; }
+    zoneIdx++;
+    placed.push({ x, y, w:item.w, h:item.h });
+    return { ...item, x, y };
+  });
+}
+
+const CARDS = layoutItems(ITEMS);
+
+// ─────────────────────────────────────────────
+//  Build card icons per category
+// ─────────────────────────────────────────────
+function cardIcon(tag) {
+  const s = (path, extra='') =>
+    `<svg class="card-icon" width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${path}</svg>`;
+  if (tag === 'Branding')         return s('<circle cx="26" cy="26" r="18"/><circle cx="26" cy="26" r="8"/>');
+  if (tag === 'UI / UX')          return s('<rect x="8" y="12" width="36" height="28" rx="3"/><line x1="8" y1="20" x2="44" y2="20"/><circle cx="14" cy="16" r="2" fill="white"/>');
+  if (tag === 'Illustration')     return s('<path d="M10 40L20 20l8 14 6-10 8 16H10z"/>');
+  if (tag === 'Photography')      return s('<circle cx="26" cy="26" r="10"/><path d="M14 20a12 12 0 0 1 24 0v12a12 12 0 0 1-24 0V20z" opacity=".4"/><line x1="26" y1="8" x2="26" y2="4"/><line x1="26" y1="48" x2="26" y2="44"/>');
+  if (tag === 'Web Design')       return s('<rect x="6" y="10" width="40" height="32" rx="3"/><line x1="6" y1="18" x2="46" y2="18"/><rect x="12" y="24" width="14" height="12" rx="1" fill="white" opacity=".3"/>');
+  if (tag === 'Print')            return s('<rect x="10" y="8" width="24" height="32" rx="2"/><line x1="14" y1="16" x2="30" y2="16"/><line x1="14" y1="22" x2="30" y2="22"/><line x1="14" y1="28" x2="22" y2="28"/>');
+  if (tag === 'Motion')           return s('<circle cx="26" cy="26" r="18"/><polygon points="22,19 36,26 22,33" fill="white" opacity=".5"/>');
+  if (tag === '3D / Art Direction') return s('<path d="M26 8l18 10v16L26 44 8 34V18L26 8z"/><path d="M26 8v36M8 18l18 10 18-10" opacity=".4"/>');
+  if (tag === 'Type Design')      return s('<text x="8" y="40" font-size="38" font-weight="700" fill="white" opacity=".4" font-family="serif">A</text>');
+  return s('<rect x="12" y="12" width="28" height="28" rx="2"/><rect x="18" y="18" width="16" height="16" fill="white" opacity=".3"/>');
+}
+
+// ─────────────────────────────────────────────
+//  Render cards into DOM
+// ─────────────────────────────────────────────
+const world = document.getElementById('world');
+
+CARDS.forEach((item, cardIndex) => {
+  const a = document.createElement('a');
+  a.className = 'card';
+  a.href = item.href || '#';
+  a.style.cssText = `left:${item.x}px; top:${item.y}px; width:${item.w}px;`;
+
+  const grad = `linear-gradient(135deg, ${item.grad.join(', ')})`;
+  const thumbContent = item.img
+    ? `<img src="${item.img}" alt="${item.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+    : `<div style="width:100%;height:100%;background:${grad};display:flex;align-items:center;justify-content:center;">${cardIcon(item.tag)}</div>`;
+
+  a.innerHTML = `
+    <div class="card-thumb" style="height:${item.h}px">
+      <div class="card-thumb-inner" style="height:${item.h}px">
+        ${thumbContent}
+      </div>
+    </div>`;
+
+  // ── 3D Tilt ──
+  const MAX_TILT = 9; // degrees
+
+  a.addEventListener('mousemove', e => {
+    if (isDragging) return;
+    a.style.transition = 'box-shadow 0.2s ease';
+    const r = a.getBoundingClientRect();
+    const dx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
+    const dy = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
+    a.style.transform = `perspective(700px) rotateX(${-dy * MAX_TILT}deg) rotateY(${dx * MAX_TILT}deg) scale(1.04) translateZ(8px)`;
+    a.style.boxShadow = '0 20px 56px rgba(0,0,0,0.5)';
+  });
+
+  a.addEventListener('mouseleave', () => {
+    a.style.transition = 'box-shadow 0.5s ease, transform 0.65s cubic-bezier(0.23, 1, 0.32, 1)';
+    a.style.transform = '';
+    a.style.boxShadow = '';
+  });
+
+  // カードデータを要素に保持（window mouseup で参照）
+  a._item = item;
+  a._idx  = cardIndex;
+
+  world.appendChild(a);
+});
+
+document.getElementById('count-num').textContent = CARDS.length;
+
+// カードの実際の描画範囲を計算（カード本体 + テキストエリア約78px）
+const CARD_BODY_H = 78;
+const contentLeft   = Math.min(...CARDS.map(c => c.x));
+const contentTop    = Math.min(...CARDS.map(c => c.y));
+const contentRight  = Math.max(...CARDS.map(c => c.x + c.w));
+const contentBottom = Math.max(...CARDS.map(c => c.y + c.h + CARD_BODY_H));
+
+// ─────────────────────────────────────────────
+//  Pan & Inertia
+// ─────────────────────────────────────────────
+const viewport = document.getElementById('viewport');
+
+let wx = 0, wy = 0;          // world translate
+let scale = 0.72;            // initial zoom-out so cards peek from all sides
+let velX = 0, velY = 0;
+let isDragging = false;
+let didDrag = false;          // moved enough to suppress click
+let dragStartX = 0, dragStartY = 0;
+let clickTargetCard = null;   // card element pressed on mousedown
+let lastX = 0, lastY = 0;
+let lastT = 0;
+let rafId = null;
+
+wx = window.innerWidth  / 2 - contentCX * scale;
+wy = window.innerHeight / 2 - contentCY * scale;
+
+// ─────────────────────────────────────────────
+//  Place mv.svg at the initial view center
+// ─────────────────────────────────────────────
+function getMVSize() { return Math.min(Math.round(window.innerWidth * 0.58), 900); }
+let MV_W = getMVSize();
+let MV_H = MV_W;
+const mvEl = document.createElement('img');
+mvEl.src = 'images/mv.svg';
+function updateMV() {
+  MV_W = MV_H = getMVSize();
+  mvEl.style.width  = MV_W + 'px';
+  mvEl.style.height = MV_H + 'px';
+  mvEl.style.left   = (contentCX - MV_W / 2) + 'px';
+  mvEl.style.top    = (contentCY - MV_H / 2) + 'px';
+}
+mvEl.style.cssText = `position:absolute; pointer-events:none; z-index:0;`;
+updateMV();
+world.insertBefore(mvEl, world.firstChild);
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function clampWorld() {
+  const pad = 80;
+  wx = clamp(wx, window.innerWidth  - contentRight  * scale - pad, -contentLeft  * scale + pad);
+  wy = clamp(wy, window.innerHeight - contentBottom * scale - pad, -contentTop   * scale + pad);
+}
+
+// ─────────────────────────────────────────────
+//  Minimap
+// ─────────────────────────────────────────────
+const mmCanvas = document.getElementById('minimap');
+const mmCtx    = mmCanvas.getContext('2d');
+const MM_W = 150, MM_H = 120;
+mmCanvas.width  = MM_W;
+mmCanvas.height = MM_H;
+// Zoom in on the content area (not the full 7200x6000 world)
+const MM_PAD   = 120;
+const MM_OX    = contentLeft  - MM_PAD;
+const MM_OY    = contentTop   - MM_PAD;
+const MM_CW    = (contentRight  - contentLeft) + MM_PAD * 2;
+const MM_CH    = (contentBottom - contentTop)  + MM_PAD * 2;
+const MM_SCALE = Math.min(MM_W / MM_CW, MM_H / MM_CH);
+
+// Preload card images for minimap
+const mmImages = {};
+CARDS.forEach((card, i) => {
+  if (!card.img) return;
+  const img = new Image();
+  img.onload = () => { mmImages[i] = img; drawMinimap(); };
+  img.src = card.img;
+});
+
+function drawMinimap() {
+  mmCtx.clearRect(0, 0, MM_W, MM_H);
+
+  // background
+  mmCtx.fillStyle = 'rgba(24,24,27,0.92)';
+  mmCtx.beginPath();
+  mmCtx.roundRect(0, 0, MM_W, MM_H, 8);
+  mmCtx.fill();
+
+  // border
+  mmCtx.strokeStyle = 'rgba(255,255,255,0.14)';
+  mmCtx.lineWidth = 1;
+  mmCtx.beginPath();
+  mmCtx.roundRect(0.5, 0.5, MM_W-1, MM_H-1, 8);
+  mmCtx.stroke();
+
+  // helper: world coord → minimap pixel
+  const mx = x => (x - MM_OX) * MM_SCALE;
+  const my = y => (y - MM_OY) * MM_SCALE;
+
+  // mv.svg indicator
+  mmCtx.fillStyle = 'rgba(255,255,255,0.12)';
+  mmCtx.fillRect(
+    mx(contentCX - MV_W/2), my(contentCY - MV_H/2),
+    MV_W * MM_SCALE, MV_H * MM_SCALE
+  );
+
+  // cards — image or gradient
+  CARDS.forEach((card, i) => {
+    const cx = mx(card.x);
+    const cy = my(card.y);
+    const cw = Math.max(card.w * MM_SCALE, 2);
+    const ch = Math.max(card.h * MM_SCALE, 2);
+
+    if (mmImages[i]) {
+      mmCtx.drawImage(mmImages[i], cx, cy, cw, ch);
+    } else {
+      const g = mmCtx.createLinearGradient(cx, cy, cx + cw, cy + ch);
+      g.addColorStop(0, card.grad[0]);
+      g.addColorStop(1, card.grad[1]);
+      mmCtx.fillStyle = g;
+      mmCtx.fillRect(cx, cy, cw, ch);
+    }
+  });
+
+  // viewport rect (account for scale: visible world area = screen / scale)
+  const vx = mx(-wx / scale);
+  const vy = my(-wy / scale);
+  const vw = (window.innerWidth  / scale) * MM_SCALE;
+  const vh = (window.innerHeight / scale) * MM_SCALE;
+  // viewport fill tint
+  mmCtx.fillStyle = 'rgba(255,255,255,0.06)';
+  mmCtx.fillRect(vx, vy, vw, vh);
+  // viewport border
+  mmCtx.strokeStyle = 'rgba(255,255,255,0.80)';
+  mmCtx.lineWidth = 1.5;
+  mmCtx.strokeRect(vx + 0.75, vy + 0.75, vw - 1.5, vh - 1.5);
+}
+
+function applyTransform() {
+  world.style.transformOrigin = '0 0';
+  world.style.transform = `translate(${wx}px,${wy}px) scale(${scale})`;
+  drawMinimap();
+}
+clampWorld();
+applyTransform();
+
+// ── Mouse ──
+viewport.addEventListener('mousedown', e => {
+  isDragging = true;
+  didDrag = false;
+  clickTargetCard = e.target.closest('.card');
+  // ドラッグ開始時にチルトをリセット
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.transition = '';
+    c.style.transform = '';
+    c.style.boxShadow = '';
+  });
+  lastX = e.clientX;
+  lastY = e.clientY;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  lastT = performance.now();
+  velX = velY = 0;
+  viewport.classList.add('dragging');
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  e.preventDefault();
+});
+
+// ─────────────────────────────────────────────
+//  Spotlight / Mouse Stalker
+// ─────────────────────────────────────────────
+const spotOverlay = document.getElementById('spotlight-overlay');
+const spotGlow    = document.getElementById('spotlight-glow');
+let spotRaf = null;
+const SPOT_R = 520;
+
+function applySpotlight(x, y) {
+  const grad = `radial-gradient(circle ${SPOT_R}px at ${x}px ${y}px, transparent 0%, transparent 38%, rgba(8,12,22,0.25) 58%, rgba(8,12,22,0.72) 80%, #080c16 100%)`;
+  spotOverlay.style.webkitMaskImage = grad;
+  spotOverlay.style.maskImage = grad;
+  spotGlow.style.left = x + 'px';
+  spotGlow.style.top  = y + 'px';
+  spotRaf = null;
+}
+
+function moveSpotlight(x, y) {
+  if (spotRaf) return;
+  spotRaf = requestAnimationFrame(() => applySpotlight(x, y));
+}
+
+// 初期状態：画面中央にスポットライトを当ててロゴを表示
+applySpotlight(window.innerWidth / 2, window.innerHeight / 2);
+
+viewport.addEventListener('mousemove', e => moveSpotlight(e.clientX, e.clientY));
+document.body.addEventListener('mouseleave', () => {
+  spotOverlay.style.webkitMaskImage = '';
+  spotOverlay.style.maskImage = '';
+  spotGlow.style.left = '-9999px';
+  spotGlow.style.top  = '-9999px';
+});
+
+window.addEventListener('mousemove', e => {
+  moveSpotlight(e.clientX, e.clientY);
+  if (!isDragging) return;
+  const dx = e.clientX - lastX;
+  const dy = e.clientY - lastY;
+  const now = performance.now();
+  const dt = Math.max(1, now - lastT);
+  velX = dx / dt * 16;
+  velY = dy / dt * 16;
+  wx += dx; wy += dy;
+  lastX = e.clientX; lastY = e.clientY; lastT = now;
+  if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) > 8) didDrag = true;
+  clampWorld();
+  applyTransform();
+});
+
+window.addEventListener('mouseup', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  viewport.classList.remove('dragging');
+
+  // カードへのクリック判定（ドラッグなし & 対象カードあり）
+  if (!didDrag && clickTargetCard) {
+    const card = clickTargetCard;
+    clickTargetCard = null;
+    openDetail(card._item, card, card._idx);
+    return;
+  }
+  clickTargetCard = null;
+  runInertia();
+});
+
+// Suppress clicks after drag
+viewport.addEventListener('click', e => {
+  if (didDrag) { e.preventDefault(); e.stopPropagation(); }
+}, true);
+
+// ── Touch ──
+let touchStart = { x:0, y:0 };
+viewport.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  touchStart = { x:t.clientX, y:t.clientY };
+  lastX = t.clientX; lastY = t.clientY; lastT = performance.now();
+  velX = velY = 0; didDrag = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}, { passive:true });
+
+viewport.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  const dx = t.clientX - lastX;
+  const dy = t.clientY - lastY;
+  const now = performance.now();
+  const dt = Math.max(1, now - lastT);
+  velX = dx / dt * 16; velY = dy / dt * 16;
+  wx += dx; wy += dy;
+  lastX = t.clientX; lastY = t.clientY; lastT = now;
+  if (Math.abs(t.clientX - touchStart.x) > 4 || Math.abs(t.clientY - touchStart.y) > 4) didDrag = true;
+  clampWorld();
+  applyTransform();
+  e.preventDefault();
+}, { passive:false });
+
+viewport.addEventListener('touchend', () => {
+  runInertia();
+}, { passive:true });
+
+// ── Wheel / Trackpad ──
+viewport.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (e.ctrlKey) return; // pinch-to-zoom on Mac trackpad — ignore
+  wx -= e.deltaX;
+  wy -= e.deltaY;
+  clampWorld();
+  applyTransform();
+}, { passive: false });
+
+// ── Inertia ──
+function runInertia() {
+  if (rafId) cancelAnimationFrame(rafId);
+  const FRICTION = 0.91;
+  function step() {
+    velX *= FRICTION;
+    velY *= FRICTION;
+    if (Math.abs(velX) < 0.08 && Math.abs(velY) < 0.08) return;
+    wx += velX; wy += velY;
+    clampWorld();
+    applyTransform();
+    rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+}
+
+function animateTo(toX, toY, duration) {
+  if (rafId) cancelAnimationFrame(rafId);
+  const fromX = wx, fromY = wy;
+  const start = performance.now();
+  function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    wx = fromX + (toX - fromX) * ease(t);
+    wy = fromY + (toY - fromY) * ease(t);
+    clampWorld();
+    applyTransform();
+    if (t < 1) rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+}
+
+// ─────────────────────────────────────────────
+//  Keyboard navigation
+// ─────────────────────────────────────────────
+const KEY_SPEED = 18;
+const keysDown = new Set();
+(function keyLoop() {
+  if (keysDown.size) {
+    let dx = 0, dy = 0;
+    if (keysDown.has('ArrowLeft')  || keysDown.has('a')) dx =  KEY_SPEED;
+    if (keysDown.has('ArrowRight') || keysDown.has('d')) dx = -KEY_SPEED;
+    if (keysDown.has('ArrowUp')    || keysDown.has('w')) dy =  KEY_SPEED;
+    if (keysDown.has('ArrowDown')  || keysDown.has('s')) dy = -KEY_SPEED;
+    if (dx || dy) { wx += dx; wy += dy; clampWorld(); applyTransform(); }
+  }
+  requestAnimationFrame(keyLoop);
+})();
+window.addEventListener('keydown', e => {
+  keysDown.add(e.key);
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+});
+window.addEventListener('keyup', e => keysDown.delete(e.key));
+
+// ─────────────────────────────────────────────
+//  Transition to detail page
+// ─────────────────────────────────────────────
+const detailOverlay    = document.getElementById('detail-overlay');
+const detailOverlayImg  = document.getElementById('detail-overlay-img');
+const detailOverlayGrad = document.getElementById('detail-overlay-grad');
+
+function openDetail(item, cardEl, idx) {
+  const rect = cardEl.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const t = rect.top, l = rect.left;
+  const r = vw - rect.right, b = vh - rect.bottom;
+
+  // Save transition data for seamless return animation
+  sessionStorage.setItem('pfTransition', JSON.stringify({
+    rect: { t, l, r, b },
+    wx, wy, scale,
+    idx,
+    img: item.img || null,
+    grad: item.grad
+  }));
+
+  // Load card image/gradient into overlay so it zooms from the card
+  if (item.img) {
+    detailOverlayImg.src          = item.img;
+    detailOverlayImg.style.display = 'block';
+    detailOverlayGrad.style.background = 'none';
+  } else {
+    detailOverlayImg.style.display = 'none';
+    detailOverlayGrad.style.background = `linear-gradient(135deg, ${item.grad.join(', ')})`;
+  }
+
+  // Start clipped to card position (no transition)
+  detailOverlay.style.transition = 'none';
+  detailOverlay.style.clipPath   = `inset(${t}px ${r}px ${b}px ${l}px round 0px)`;
+
+  // Animate to fullscreen, then navigate
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      detailOverlay.style.transition = 'clip-path 0.65s cubic-bezier(0.23, 1, 0.32, 1)';
+      detailOverlay.style.clipPath   = 'inset(0px 0px 0px 0px round 0px)';
+      setTimeout(() => {
+        window.location.href = `detail.html?id=${idx}`;
+      }, 700);
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
+//  Mouse stalker
+// ─────────────────────────────────────────────
+const stalker = document.getElementById('cursor-stalker');
+let csX = -100, csY = -100, csTX = -100, csTY = -100;
+
+viewport.addEventListener('mouseenter', () => stalker.classList.add('visible'));
+viewport.addEventListener('mouseleave', () => stalker.classList.remove('visible'));
+window.addEventListener('mousemove', e => { csTX = e.clientX; csTY = e.clientY; });
+
+(function animStalker() {
+  csX += (csTX - csX) * 0.12;
+  csY += (csTY - csY) * 0.12;
+  stalker.style.left = csX + 'px';
+  stalker.style.top  = csY + 'px';
+  requestAnimationFrame(animStalker);
+})();
+
+// ─────────────────────────────────────────────
+//  Resize
+// ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  updateMV();
+  clampWorld();
+  applyTransform();
+  drawMinimap();
+});
+
+// ─────────────────────────────────────────────
+//  Return animation from detail page
+// ─────────────────────────────────────────────
+const pfReturn = sessionStorage.getItem('pfReturn');
+if (pfReturn) {
+  sessionStorage.removeItem('pfReturn');
+  const ret = JSON.parse(pfReturn);
+
+  // Restore viewport to the same position as when card was clicked
+  wx = ret.wx; wy = ret.wy; scale = ret.scale;
+  clampWorld(); applyTransform();
+
+  const { t, l, r, b } = ret.rect;
+
+  // Load same image/gradient into overlay
+  if (ret.img) {
+    detailOverlayImg.src           = ret.img;
+    detailOverlayImg.style.display = 'block';
+    detailOverlayGrad.style.background = 'none';
+  } else {
+    detailOverlayImg.style.display = 'none';
+    detailOverlayGrad.style.background = `linear-gradient(135deg, ${ret.grad.join(', ')})`;
+  }
+
+  // Start fullscreen (no transition), then shrink to card position
+  detailOverlay.style.transition = 'none';
+  detailOverlay.style.clipPath   = 'inset(0px 0px 0px 0px round 0px)';
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      detailOverlay.style.transition = 'clip-path 0.65s cubic-bezier(0.23, 1, 0.32, 1)';
+      detailOverlay.style.clipPath   = `inset(${t}px ${r}px ${b}px ${l}px round 0px)`;
+      setTimeout(() => {
+        detailOverlay.style.transition = 'none';
+        detailOverlay.style.clipPath   = 'inset(50% 50% 50% 50% round 0px)';
+      }, 700);
+    });
+  });
+}
+</script>
+</body>
+</html>
