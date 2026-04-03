@@ -270,10 +270,6 @@
     .skill-block {
       background: rgba(255,255,255,0.03);
       padding: 36px 32px;
-      transition: background 0.3s;
-    }
-    .skill-block:hover {
-      background: rgba(255,255,255,0.055);
     }
     .skill-block-label {
       font-size: 10px;
@@ -618,29 +614,35 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-    }
-    .career-item {
-      background: rgba(255,255,255,0.03);
-      padding: 40px;
       position: relative;
-      overflow: hidden;
-      transition: background 0.3s;
     }
-    .career-item:hover {
-      background: rgba(255,255,255,0.05);
-    }
-    .career-item::before {
+    /* 縦線 */
+    .career-timeline::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      width: 2px;
-      height: 100%;
-      background: var(--accent);
-      opacity: 0;
-      transition: opacity 0.3s;
+      bottom: 0;
+      left: 20px;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.12) 8%, rgba(255,255,255,0.12) 92%, transparent);
     }
-    .career-item:hover::before { opacity: 1; }
+    .career-item {
+      background: rgba(255,255,255,0.03);
+      padding: 40px 40px 40px 56px;
+      position: relative;
+    }
+    /* ドット */
+    .career-item::before {
+      content: '';
+      position: absolute;
+      top: 44px;
+      left: 14px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(255, 0, 119, 0.15);
+    }
     .career-header {
       display: flex;
       align-items: flex-start;
@@ -761,12 +763,6 @@
         <p>
           「なぜこのデザインなのか」を徹底的に言語化し、デザインをビジネスの「資産」として成長させることを信条としています。
         </p>
-      </div>
-      <div class="bio-stats">
-        <div class="stat-row">
-          <span class="stat-label">Available</span>
-          <span class="stat-value" style="color:var(--accent);">Open to work</span>
-        </div>
       </div>
     </div>
   </section>
