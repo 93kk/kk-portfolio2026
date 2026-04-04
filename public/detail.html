@@ -465,6 +465,55 @@
       height: 8px;
     }
 
+    /* ── Title row ── */
+    #detail-title-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    #detail-view-site {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.14);
+      padding: 10px 20px;
+      margin-bottom: 8px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    #detail-view-site:hover {
+      color: rgba(255,255,255,0.9);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Desc headings ── */
+    .desc-h2 {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0em;
+      margin-top: 32px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .desc-h3 {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
     /* ── Scroll reveal ── */
     .reveal {
       opacity: 0;
@@ -512,9 +561,13 @@
 <section id="detail-content">
   <div id="detail-header" class="reveal">
     <div id="detail-tag"></div>
-    <h1 id="detail-title"></h1>
-    <div id="detail-hashtags"></div>
-    <a id="detail-url" href="#" target="_blank"></a>
+    <div id="detail-title-row">
+      <h1 id="detail-title"></h1>
+      <a id="detail-view-site" href="#" target="_blank" rel="noopener noreferrer">
+        <span>View Site</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
   </div>
   <div id="detail-body" class="reveal">
     <div id="detail-gallery-col"></div>
@@ -531,6 +584,14 @@
         <div class="outline-meta-row">
           <span class="outline-meta-label">Year</span>
           <span class="outline-meta-value" id="detail-outline-year"></span>
+        </div>
+        <div class="outline-meta-row" id="detail-client-row">
+          <span class="outline-meta-label">Client</span>
+          <span class="outline-meta-value" id="detail-outline-client"></span>
+        </div>
+        <div class="outline-meta-row" id="detail-scope-row">
+          <span class="outline-meta-label">Scope</span>
+          <span class="outline-meta-value" id="detail-outline-scope"></span>
         </div>
       </div>
     </div>
@@ -579,9 +640,11 @@ const ITEMS = [
     desc:'',
     gallery:[] },
   // 1
-  { tag:'Branding', title:'AI SHIFT', year:'2024', grad:['#4FACFE','#00C6FF'], img:'/images/tp-07.png',
-    tags:['ブランディング','ロゴ','Webデザイン'], url:'',
-    desc:'02. 株式会社AI Shift（ブランディング・Webサイト）\n徹底したコンセプトワーク\n\nロゴのコンセプト設計からWebサイトの構築までトータルで担当。\nロゴ制作では、チームでのアイデア出しから20案以上のプロトタイプを作成し、黄金比・白銀比を用いた緻密なブラッシュアップを重ねました。Webサイトでは、AIの先進性を表現するため海外サイトのような大胆なレイアウトを採用。ロゴの意図である「AIと人の融合」をアニメーションにも落とし込み、一貫したブランド体験を提供しました。その結果、クライアントから高い評価をいただき、継続的なパートナーシップへと繋がっています。',
+  { tag:'Branding', title:'AI SHIFT', year:'2020', grad:['#4FACFE','#00C6FF'], img:'/images/tp-07.png',
+    url:'https://www.ai-shift.co.jp/',
+    client:'株式会社 AI Shift様',
+    scope:'ウェブデザイン / ロゴ / アニメーション',
+    desc:'**ロゴ制作\n***"企業らしさ"と"シンプルで美しい"を両立させたロゴ\n\nヒアリング、コンセプト設計、デザイン、ブラッシュアップまで担当しました。\n\nクライアント様へのヒアリングを元に、デザイン前のコンセプト案を5〜6案提案。シンプルなコンセプトから抽象度の高いコンセプトまで、昼夜考え続けながら幅広く提出し、クライアントとすり合わせていきました。\n\nデザインフェーズではチームメンバー5人で案出しを行なっています。コンセプトをメンバーに共有、デザイン案を20案程度出した後、チームやクライアント様とすり合わせながら、コーポレートロゴとしてデザインを絞り込んでいます。\n\n自分では到底思いつかなかった案が出てくるなど、メンバー間でのアイデア出しの重要性を実感しました。絞られた4案でブラッシュアップしています。黄金比や白銀比を使い、感覚的に美しいと感じられるところを、たくさんのパターンを試すことで検証していきました。\n\n詳しい制作過程はブログにて公開しています。\nhttps://www.tcmobile.jp/4-ffff/blog-creative/1586/\n\n**コーポレートサイト\n***他媒体との統一感を持たせるため、インパクトのあるロゴを大きく使用\n\nコーポレートサイトデザインは、AIの先進的なイメージを醸成するため、海外サイトのようなファーストビューを目指しました。イベントへの登壇やメディア露出など、色々なきっかけで流入してくることが想定されたため、インパクトのあるロゴを大きく使用することでユーザーに一貫したイメージを与えます。英語のコピーを目立たせながら、シンプルなテイストでデザインしています。\n\n全体的なレイアウトはロゴのテイストを踏襲し、直線と曲線を合わせたトンマナで統一しています。アニメーションは、「AIと人の融合によって、人が主体的になって新たな可能性を広げていく様子」というロゴコンセプトを落とし込んでいます。コーディングは外注のため、指示書を作成しbacklog上でやりとりを重ねながら調整していきました。',
     gallery:['/images/tp-07-aishift/aishift-01.svg','/images/tp-07-aishift/aishift-02.png','/images/tp-07-aishift/aishift-03.png','/images/tp-07-aishift/aishift-04.png'] },
   // 2
   { tag:'Branding', title:'ALGORI', year:'2023', grad:['#43E97B','#38F9D7'], img:'/images/tp-05.png',
@@ -650,12 +713,17 @@ function show(idx) {
   const item = ITEMS[idx];
   document.getElementById('detail-tag').textContent        = item.tag;
   document.getElementById('detail-title').textContent      = item.title;
-  // desc内のURLをリンク化
+  // desc レンダリング（**=H2、***=H3、URL=リンク化）
   const rawDesc = item.desc || '';
   const escapedDesc = rawDesc
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const linkedDesc = escapedDesc.replace(
-    /(https?:\/\/[^\s]+)/g,
+  const processedDesc = escapedDesc.split('\n').map(line => {
+    if (line.startsWith('***')) return `<span class="desc-h3">${line.slice(3)}</span>`;
+    if (line.startsWith('**'))  return `<span class="desc-h2">${line.slice(2)}</span>`;
+    return line;
+  }).join('\n');
+  const linkedDesc = processedDesc.replace(
+    /(https?:\/\/[^\s<]+)/g,
     '<a class="inline-link" href="$1" target="_blank" rel="noopener noreferrer">' +
     '$1<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' +
@@ -668,19 +736,23 @@ function show(idx) {
   document.getElementById('detail-counter').textContent    = `${idx + 1} / ${ITEMS.length}`;
   document.title = item.title + ' — Portfolio';
 
-  // ハッシュタグ
-  const hashEl = document.getElementById('detail-hashtags');
-  hashEl.innerHTML = (item.tags || []).map(t => `<span class="detail-hashtag">#${t}</span>`).join('');
-
-  // URL
-  const urlEl = document.getElementById('detail-url');
+  // View Site ボタン
+  const viewSiteEl = document.getElementById('detail-view-site');
   if (item.url) {
-    urlEl.textContent = item.url;
-    urlEl.href = 'https://' + item.url;
-    urlEl.style.display = 'inline-block';
+    const resolvedUrl = item.url.startsWith('http') ? item.url : 'https://' + item.url;
+    viewSiteEl.href = resolvedUrl;
+    viewSiteEl.style.display = 'inline-flex';
   } else {
-    urlEl.style.display = 'none';
+    viewSiteEl.style.display = 'none';
   }
+
+  // Client / Scope
+  const clientRow = document.getElementById('detail-client-row');
+  const scopeRow  = document.getElementById('detail-scope-row');
+  document.getElementById('detail-outline-client').textContent = item.client || '';
+  document.getElementById('detail-outline-scope').textContent  = item.scope  || '';
+  clientRow.style.display = item.client ? '' : 'none';
+  scopeRow.style.display  = item.scope  ? '' : 'none';
 
   // ── 左カラム（画像・PDF）──────────────────────────────────
   const galCol = document.getElementById('detail-gallery-col');
