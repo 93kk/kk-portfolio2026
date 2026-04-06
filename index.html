@@ -437,7 +437,7 @@
 // ─────────────────────────────────────────────
 const ITEMS = [
   // 0
-  { tag:'Branding',           title:'Maison Verte — Visual Identity',   year:'2024', grad:['#FF6B6B','#FF8E53'], w:420, h:300, href:'#maison-verte', img:'/images/tp-01.png' },
+  { tag:'Branding',           title:'Maison Verte — Visual Identity',   year:'2024', grad:['#FF6B6B','#FF8E53'], w:420, h:300, href:'#maison-verte', img:'/images/10-dcm.png' },
   // 1
   { tag:'Branding',           title:'AI SHIFT',       year:'2024', grad:['#4FACFE','#00C6FF'], w:390, h:270, href:'#ai-shift', img:'/images/tp-07.png' },
   // 2
@@ -1017,6 +1017,17 @@ window.addEventListener('resize', () => {
 // ─────────────────────────────────────────────
 //  詳細ページから戻った時の明転アニメーション
 // ─────────────────────────────────────────────
+function fadeIn() {
+  fadeOverlay.style.transition = 'none';
+  fadeOverlay.style.opacity = '1';
+  fadeOverlay.style.pointerEvents = 'all';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fadeOverlay.style.transition = 'opacity 0.5s ease';
+    fadeOverlay.style.opacity = '0';
+    setTimeout(() => { fadeOverlay.style.pointerEvents = 'none'; }, 550);
+  }));
+}
+
 const pfReturn = sessionStorage.getItem('pfReturn');
 if (pfReturn) {
   sessionStorage.removeItem('pfReturn');
@@ -1026,15 +1037,15 @@ if (pfReturn) {
   wx = ret.wx; wy = ret.wy; scale = ret.scale;
   clampWorld(); applyTransform();
 
-  // 黒から明転
-  fadeOverlay.style.transition = 'none';
-  fadeOverlay.style.opacity = '1';
-  setTimeout(() => {
-    fadeOverlay.style.transition = 'opacity 0.5s ease';
-    fadeOverlay.style.opacity = '0';
-    setTimeout(() => { fadeOverlay.style.pointerEvents = 'none'; }, 550);
-  }, 50);
+  fadeIn();
 }
+
+// ブラウザバックで bfcache から復元された場合に黒画面になるのを防ぐ
+window.addEventListener('pageshow', e => {
+  if (e.persisted) {
+    fadeIn();
+  }
+});
 
 // ─────────────────────────────────────────────
 //  Nav links — フェードアウト遷移
