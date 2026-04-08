@@ -628,14 +628,21 @@ const MM_CW    = (contentRight  - contentLeft) + MM_PAD * 2;
 const MM_CH    = (contentBottom - contentTop)  + MM_PAD * 2;
 const MM_SCALE = Math.min(MM_W / MM_CW, MM_H / MM_CH);
 
-// Preload card images for minimap
+// Preload card images for minimap（ブラウザアイドル時に遅延ロード）
 const mmImages = {};
-CARDS.forEach((card, i) => {
-  if (!card.img) return;
-  const img = new Image();
-  img.onload = () => { mmImages[i] = img; drawMinimap(); };
-  img.src = card.img;
-});
+const _loadMmImages = () => {
+  CARDS.forEach((card, i) => {
+    if (!card.img) return;
+    const img = new Image();
+    img.onload = () => { mmImages[i] = img; drawMinimap(); };
+    img.src = card.img;
+  });
+};
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(_loadMmImages, { timeout: 2000 });
+} else {
+  setTimeout(_loadMmImages, 500);
+}
 
 function drawMinimap() {
   mmCtx.clearRect(0, 0, MM_W, MM_H);
