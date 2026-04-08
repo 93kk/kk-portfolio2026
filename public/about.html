@@ -225,15 +225,19 @@
       flex-direction: column;
       gap: 48px;
     }
+    .bio-text {
+      max-width: 1020px;
+      margin: 0 auto;
+    }
     .bio-stats {
       display: grid !important;
       grid-template-columns: repeat(2, 1fr);
       gap: 0 48px;
     }
     .bio-text p {
-      font-size: 17px;
+      font-size: 16px;
       line-height: 1.85;
-      color: rgba(255,255,255,0.72);
+      color: rgba(255,255,255,0.9);
       margin-bottom: 20px;
     }
     .bio-text p:last-child { margin-bottom: 0; }
@@ -716,6 +720,154 @@
       opacity: 1;
       transform: none;
     }
+
+    /* ── Masonry bubbles (04 — Personality) ── */
+    .masonry-section {
+      margin-bottom: 56px;
+    }
+    .masonry-section:last-child {
+      margin-bottom: 0;
+    }
+    .masonry-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .masonry-label::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    /* ── マインド: 5列横並び ── */
+    .masonry-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .masonry-grid:not(.masonry-grid--works) .masonry-bubble { grid-column: span 1; }
+
+    /* ── 好きな作品: 3カラムグリッド ── */
+    .masonry-grid--works {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    /* 最後の吹き出し（吉田ユニ…）は span 2 */
+    .masonry-grid--works .masonry-bubble:nth-child(9) { grid-column: span 2; }
+
+    .masonry-bubble {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 24px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.9);
+    }
+    .masonry-bubble--work {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      padding: 14px 20px;
+      border-radius: 12px;
+    }
+    .masonry-bubble--accent {
+      border-color: rgba(255,0,119,0.22);
+      background: rgba(255,0,119,0.04);
+    }
+
+    /* ── ランダム感：回転と角丸のばらつき ── */
+    .masonry-bubble:nth-child(2n)   { transform: rotate(0.5deg);  border-radius: 14px 20px 18px 12px; }
+    .masonry-bubble:nth-child(3n)   { transform: rotate(-0.7deg); border-radius: 20px 12px 16px 18px; }
+    .masonry-bubble:nth-child(4n)   { transform: rotate(0.4deg);  border-radius: 12px 18px 20px 14px; }
+    .masonry-bubble:nth-child(5n)   { transform: rotate(-0.5deg); border-radius: 18px 14px 12px 20px; }
+    .masonry-bubble:nth-child(7n)   { transform: rotate(0.9deg);  border-radius: 16px 10px 18px 22px; }
+
+    /* ════════════════════════════════
+       RESPONSIVE — Tablet (≤900px)
+    ════════════════════════════════ */
+    @media (max-width: 900px) {
+      main { padding-top: 100px; }
+
+      .hero { padding: 48px 32px 72px; }
+      .hero-scroll-line { left: 32px; right: 32px; }
+
+      .section { padding: 56px 32px; }
+
+      .philosophy { padding: 72px 32px; }
+      .contact-cta { padding: 56px 32px; }
+
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+
+      /* マインド: 3列 */
+      .masonry-grid { grid-template-columns: repeat(3, 1fr); }
+      /* 好きな作品: 2列 */
+      .masonry-grid--works { grid-template-columns: repeat(2, 1fr); }
+      .masonry-grid--works .masonry-bubble:nth-child(9) { grid-column: span 2; }
+    }
+
+    /* ════════════════════════════════
+       RESPONSIVE — Mobile (≤600px)
+    ════════════════════════════════ */
+    @media (max-width: 600px) {
+      /* Header */
+      #header { padding: 16px 20px; }
+      .nav-links { gap: 8px; }
+      .nav-links a { font-size: 13px; }
+
+      /* Main */
+      main { padding-top: 80px; padding-bottom: 80px; }
+
+      /* Hero */
+      .hero { padding: 32px 20px 56px; }
+      .hero-label { margin-bottom: 28px; }
+      .hero-ja { font-size: 13px; letter-spacing: 0.06em; }
+      .hero-scroll-line { left: 20px; right: 20px; }
+
+      /* Section */
+      .section { padding: 40px 20px; }
+      .section-number { margin-bottom: 28px; }
+
+      /* Career */
+      .career-item { padding: 28px 20px 28px 40px; }
+      .career-header { flex-direction: column; gap: 6px; }
+      .career-summary { padding-left: 0; margin-top: 12px; }
+      .career-achievements { padding-left: 0; gap: 14px; }
+      .career-company { font-size: 18px; }
+
+      /* Skills */
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .skill-block { padding: 24px 20px; }
+
+      /* Masonry マインド: 1列縦積み */
+      .masonry-grid { grid-template-columns: 1fr; }
+      .masonry-grid:not(.masonry-grid--works) .masonry-bubble { grid-column: span 1; }
+      /* 好きな作品: 2列 */
+      .masonry-grid--works { grid-template-columns: repeat(2, 1fr); }
+      .masonry-grid--works .masonry-bubble:nth-child(9) { grid-column: span 2; }
+      /* 回転なし（モバイルでは可読性優先） */
+      .masonry-bubble { transform: none !important; border-radius: 12px !important; }
+
+      /* Philosophy */
+      .philosophy { padding: 48px 20px; }
+      .philosophy-bg-text { font-size: 100px; }
+
+      /* Contact CTA */
+      .contact-cta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 28px;
+        padding: 40px 20px;
+      }
+      .cta-link { width: 100%; text-align: center; }
+    }
   </style>
 </head>
 <body>
@@ -744,8 +896,12 @@
     <h1 class="hero-en">
       Imperfection is beauty,<br>madness is genius
     </h1>
-    <p class="hero-ja">不完全は美しく、狂気は天才</p>
-    <p class="hero-role">Kumi Koishi &nbsp;·&nbsp; Web Designer &amp; Art Director</p>
+    <p class="hero-ja">
+      完璧なものに人は驚かない。<br>
+      不完全だからこそ愛おしく、<br>
+      情熱があるからこそ人の心は動かされる。<br>
+      そんな人間らしいデザインを追求したい。
+    </p>
     <div class="hero-scroll-line"></div>
   </section>
 
@@ -755,14 +911,16 @@
     <div class="bio-grid">
       <div class="bio-text">
         <p>
-          <strong>デザインを、ビジネスの「資産」に。</strong><br>
-          デザイナーとして約10年、受託制作と事業会社の両面からクリエイティブに従事。
+          32歳。2016年に大学卒業後、WEB制作会社でWEBデザイナーとしてワイヤーフレームからLP・バナー・サイト・UIデザイン・ロゴ・チラシなど幅広い制作業務に携わりました。また手を動かすだけでなく、リードデザイナーとして後輩指導や、ディレクターと一緒にデザイン提案に同行、クライアントとワイヤーフレームをすりあわせるなど、上流から携わり、<strong>「デザインを言語化する」</strong>ことに重きを置いていました。
         </p>
         <p>
-          受託制作時代はリードデザイナーとして、数百万規模の大型案件の戦略立案からコンポーネント設計、実装までを完遂。現在は事業会社のコミュニケーションデザイナーとして、採用イベントのブランディングやチームビルディング、最新技術（STUDIO等）の導入を牽引してきました。
+          2021年より事業会社のデザイナーとして、エンジニア採用イベント企画運用会社で、WEBデザインを主軸にロゴ・チラシ・動画配信画面などの作成を行ってきました。メンバー間では週次で制作物を報告し合い、クオリティチェックが行われますが、お互いのリスペクトがあるため、私が入社してから現在まで1人も退職していないほどチームの風通しが良いです。また、副業を通してコーディングやAI音声を使用したショート動画も経験しています。この事業会社では<strong>「クオリティを上げていくことで事業・商材への期待感を醸成する」</strong>ということが主軸でした。
         </p>
         <p>
-          「なぜこのデザインなのか」を徹底的に言語化し、デザインをビジネスの「資産」として成長させることを信条としています。
+          しかし、2025年に子供が生まれ、子供と関わる機会が増えたことで、今まで全く触れてこなかった世界を知り、<strong>「子どもたちが幸せを描ける未来を作りたい」</strong>という想いが強くなりました。今後は医療系や、AIなどを使った社会課題解決を目指す企業、自分事化できるサービス（子育て・食・フェムテック）などを軸に、デザインの力で、企業の持続的な成長と社会への貢献を支えていける、そんなデザイナーを目指しています。
+        </p>
+        <p>
+          また、育休中の現在、AIがかなり進化していることを知り、最近は育児の合間にClaude Codeを触っています。こうしたAIを使って業務を効率化しつつ、デザイナー以外の方とのやりとりを円滑にできるよう模索していきます。
         </p>
       </div>
     </div>
@@ -869,81 +1027,48 @@
     </div>
   </section>
 
-  <!-- Personality / Chat bubbles -->
+  <!-- Personality / Masonry bubbles -->
   <section class="section reveal">
     <div class="section-number">04 — Personality</div>
-    <div class="chat-area">
 
-      <!-- 好きなこと -->
-      <div class="chat-block">
-        <div class="chat-block-title">好きなこと</div>
-        <div class="chat-row left">
-          <div class="chat-avatar">K</div>
-          <div class="bubble">
-            <p>あーでもないこうでもないという、年齢や先輩後輩に縛られず、メンバーと対等に意見を出し合って一つのプロダクトを作った経験はとても苦しく、楽しかったです。</p>
-            <p>現状は試行錯誤して成果物を作っていくフェーズはAIが台頭していきそうですが、意思決定して責任を持つという人の価値は変わらないと思うので、決めていく審美眼を引き続き鍛えていきたいです。</p>
-          </div>
+    <!-- マインド -->
+    <div class="masonry-section">
+      <div class="masonry-label">マインド</div>
+      <div class="masonry-grid">
+        <div class="masonry-bubble">
+          メンバーと対等に意見を出し合って一つのものを作る経験は苦しかったですが、楽しい経験でした。
         </div>
-        <div class="chat-row right">
-          <div class="bubble">
-            <div class="bubble-topic">新しいことをやる</div>
-            <p>アニメーションや3DCG、STUDIOやFigmaなど、前職ではやってこなかった技術に挑戦してきました。これからはデザインスキルの向上以外に、ビジネス視点を体現するデザイナーを目指していきます。</p>
-          </div>
-          <div class="chat-avatar">K</div>
+        <div class="masonry-bubble">
+          好奇心旺盛で、新しいことや技術を知ることにワクワクします。アニメーションや3DCG、ノーコードツールやAIなど幅を広げています。
+        </div>
+        <div class="masonry-bubble">
+          人間臭いものが好きで「ノンフィクション」「家ついて行っていいですか？」などの番組を見て、色々な人の価値観や生き方に触れることが面白いです。
+        </div>
+        <div class="masonry-bubble">
+          高圧的な人が苦手です。難しい言葉を羅列する人よりも、誰にでもわかる言葉で会話することが大切だと考えています。
+        </div>
+        <div class="masonry-bubble">
+          音楽フェスが好きで、ロックインジャパンに毎年行っています。にわかなので色んなアーティストが見られることが楽しいです。
         </div>
       </div>
-
-      <!-- 苦手なこと -->
-      <div class="chat-block">
-        <div class="chat-block-title">苦手なこと</div>
-        <div class="chat-row left">
-          <div class="chat-avatar">K</div>
-          <div class="bubble">
-            <p>高圧的な人と仕事をすることが苦手。</p>
-            <p>難しい言葉を羅列する人よりも、誰にでもわかる言葉で会話することが大切だと考えていますし、そういった方がいたら、私も気をつけようという戒めにしています。</p>
-          </div>
-        </div>
-        <div class="chat-row right">
-          <div class="bubble">
-            <div class="bubble-topic">自分が想像できない商材やサービス</div>
-            <p>効果が実感できる手触り感がない仕事が不安でした。</p>
-          </div>
-          <div class="chat-avatar">K</div>
-        </div>
-      </div>
-
-      <!-- やりたいこと -->
-      <div class="chat-block">
-        <div class="chat-block-title">やりたいこと・今後の展望</div>
-        <div class="chat-row left">
-          <div class="chat-avatar">K</div>
-          <div class="bubble">
-            <div class="bubble-topic">デザインを「点」ではなく「線（資産）」として</div>
-            <p>これまでは「一過性のイベント」や「クライアントワーク」を中心に、クリエイティブの瞬発力を磨いてきました。</p>
-            <p>今後は、デザインを「点」ではなく「線（資産）」として捉え、企業の持続的な成長にデザインをどう接続するか——ビジネスの深部に挑戦したいと考えています。</p>
-          </div>
-        </div>
-        <div class="chat-row right">
-          <div class="bubble">
-            <div class="bubble-topic">社会的なニーズが途切れない領域へ</div>
-            <p>医療・食・育児等の社会的ニーズが途切れない領域、あるいは高い技術力を持ちながらその魅力が世の中に伝わりきっていない実力派企業において、デザインの力で新しい価値を可視化することに情熱を注ぎたいと考えています。</p>
-          </div>
-          <div class="chat-avatar">K</div>
-        </div>
-      </div>
-
     </div>
-  </section>
 
-  <!-- Philosophy -->
-  <section class="philosophy reveal">
-    <div class="philosophy-bg-text">DESIGN</div>
-    <blockquote class="philosophy-quote">
-      To work on what I love<br>
-      is the <em>core principle</em><br>
-      of my life.
-    </blockquote>
-    <p class="philosophy-attr">Kumi Koishi</p>
+    <!-- 好きな作品 -->
+    <div class="masonry-section">
+      <div class="masonry-label">好きな作品</div>
+      <div class="masonry-grid masonry-grid--works">
+        <div class="masonry-bubble masonry-bubble--work">カルテット</div>
+        <div class="masonry-bubble masonry-bubble--work">アンメット ある脳外科医の日記</div>
+        <div class="masonry-bubble masonry-bubble--work">ブラッシュアップライフ</div>
+        <div class="masonry-bubble masonry-bubble--work">落語心中</div>
+        <div class="masonry-bubble masonry-bubble--work">夏目友人帳</div>
+        <div class="masonry-bubble masonry-bubble--work">PSYCHO-PASS</div>
+        <div class="masonry-bubble masonry-bubble--work">シュタインズゲート</div>
+        <div class="masonry-bubble masonry-bubble--work">山本裕典、ホストになる【衝突編】</div>
+        <div class="masonry-bubble masonry-bubble--work masonry-bubble--accent">吉田ユニさんや田中達也さんなどの「見立て」が面白い作品</div>
+      </div>
+    </div>
+
   </section>
 
   <!-- Contact CTA -->
@@ -951,7 +1076,7 @@
     <div class="contact-cta-text">
       Let's work<br><span>together.</span>
     </div>
-    <a href="mailto:hello@kumikoishi.com" class="cta-link">
+    <a href="mailto:clover.koishi@gmail.com" class="cta-link">
       <span>Get in touch</span>
     </a>
   </div>

@@ -525,12 +525,12 @@
 
     /* ── Gallery labels ── */
     .gallery-label {
-      font-size: 10px;
+      font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.38);
-      padding-top: 14px;
+      color: rgba(255,255,255,0.9);
+      margin-top: 32px;
       padding-bottom: 5px;
     }
 
@@ -671,7 +671,7 @@ const ITEMS = [
     url:'https://xd.adobe.com/view/853e1307-9586-4929-901b-fc5a292e97a4-d06d/?fullscreen',
     client:'NTT東日本', scope:'ウェブデザイン / ロゴ / 資料 / チラシ / youtube配信画面',
     desc:'**学生エンジニア向けプログラミングコンテスト「ALGORI」\n***一貫した世界観でプログラミングの「言語的意義」を視覚化\n\n学生エンジニアを対象としたコンテストにおいて、ロゴ、Webサイト、チラシ、オンライン配信画面など、ビジュアルコミュニケーション全般の制作を担当いたしました。\n「プログラミング＝コンピューターとの対話」と定義し、文字、音声、点字、手話、モールス信号といった多様なコミュニケーション手段をデザインの起点としています。\n先進的な配色と質感を取り入れることで学生の感性に響くクリエイティブを追求し、プログラミング言語の本質を問うコンテストのブランドイメージをトータルに構築いたしました。',
-    gallery:[{src:'/images/tp-05-algori/algori-01.png',label:'LP'},{src:'/images/tp-05-algori/algori-03.jpg',label:'YouTube配信画面'},{src:'/images/tp-05-algori/algori-04.png',label:'チラシ'},{type:'pdf',src:'/images/tp-05-algori/logo-regulation.pdf',label:'ロゴ提案'}] },
+    gallery:[{src:'/images/tp-05-algori/algori-01.png',label:'LP'},{src:'/images/tp-05-algori/algori-03.jpg',label:'YouTube配信画面'},{src:'/images/tp-05-algori/algori-04.png',label:'チラシ'},{type:'pdf',src:'/images/tp-05-algori/logo-regulation.pdf',label:'ロゴ提案'},{type:'pdf',src:'/images/tp-05-algori/NTTeast_logo.pdf',label:'NTT東日本 ロゴ'}] },
   // 3
   { tag:'UI / UX', title:'SONY CLOUD TECH IDEATHON', year:'2021', grad:['#667EEA','#764BA2'], img:'/images/03.png',
     client:'SONY', scope:'ウェブデザイン（STUDIO） / 3DCG',
@@ -945,6 +945,7 @@ const io = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
 </script>
 </body>
 </html>
