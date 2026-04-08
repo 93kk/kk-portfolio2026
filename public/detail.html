@@ -525,12 +525,12 @@
 
     /* ── Gallery labels ── */
     .gallery-label {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: rgba(255,255,255,0.9);
-      margin-top: 32px;
+      margin-top: 20px;
       padding-bottom: 5px;
     }
 
@@ -560,6 +560,26 @@
     }
     .pdf-fallback a { color:var(--accent); text-decoration:none; }
     .pdf-fallback a:hover { text-decoration:underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      #detail-content {
+        padding: 100px 20px 60px;
+      }
+      #detail-body {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      /* 説明エリアを上、画像エリアを下に */
+      #detail-outline {
+        order: 1;
+        position: static;
+        padding: 24px 20px;
+      }
+      #detail-gallery-col {
+        order: 2;
+      }
+    }
   </style>
 </head>
 <body>
