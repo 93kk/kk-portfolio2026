@@ -15,7 +15,7 @@ const serveImages = {
         const imgPath = path.join(__dirname, req.url)
         if (fs.existsSync(imgPath)) {
           const ext = path.extname(imgPath).slice(1).toLowerCase()
-          const mime = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml' }
+          const mime = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', svg: 'image/svg+xml' }
           res.setHeader('Content-Type', mime[ext] ?? 'application/octet-stream')
           res.end(fs.readFileSync(imgPath))
           return
